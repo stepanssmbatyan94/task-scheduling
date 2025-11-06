@@ -80,9 +80,12 @@ export class TasksRelationalRepository implements TaskRepository {
       queryBuilder.orderBy('task.createdAt', 'DESC');
     }
 
-    queryBuilder
-      .skip((paginationOptions.page - 1) * paginationOptions.limit)
-      .take(paginationOptions.limit);
+    // If limit is -1, skip pagination and return all results
+    if (paginationOptions.limit !== -1) {
+      queryBuilder
+        .skip((paginationOptions.page - 1) * paginationOptions.limit)
+        .take(paginationOptions.limit);
+    }
 
     const entities = await queryBuilder.getMany();
 
