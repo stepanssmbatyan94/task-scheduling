@@ -1,0 +1,99 @@
+.kanban-card {
+  background: white;
+  border-radius: 6px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: grab;
+  transition: all 0.2s;
+}
+
+.kanban-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.kanban-card:active {
+  cursor: grabbing;
+}
+
+.kanban-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.kanban-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.kanban-card-description {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.kanban-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.kanban-card-assignee {
+  margin-right: auto;
+}
+
+.kanban-card-assign-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: auto;
+  padding: 0;
+  font-size: 12px;
+}
+
+.kanban-card-assign-button:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+.kanban-card-assign-button:active {
+  background: #d1d5db;
+  transform: scale(0.95);
+}
+
+.kanban-card-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.kanban-card-avatar {
+  flex-shrink: 0;
+}
+
+:deep(.kanban-card-avatar .p-avatar) {
+  width: 24px !important;
+  height: 24px !important;
+  font-size: 10px !important;
+}
+

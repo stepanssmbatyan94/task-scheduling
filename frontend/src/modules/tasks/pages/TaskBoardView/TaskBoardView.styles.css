@@ -1,0 +1,10 @@
+.task-board-container {
+  @apply h-full;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.kanban-wrapper {
+  min-height: 600px;
+}

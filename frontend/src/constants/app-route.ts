@@ -12,5 +12,7 @@ export const AppRoute = {
   ROLE: '/user-management/roles',
   ROLE_CREATE: '/user-management/roles/create',
   ROLE_DETAILS: '/user-management/roles/:id',
-  ROLE_EDIT: '/user-management/roles/:id/edit'
+  ROLE_EDIT: '/user-management/roles/:id/edit',
+
+  TASKS: '/tasks'
 } as const;

@@ -1,4 +1,4 @@
-import { LayoutDashboard, UserCog } from 'lucide-vue-next';
+import { LayoutDashboard, UserCog, ClipboardList } from 'lucide-vue-next';
 
 import { AppRoute, Permission } from '@/constants';
 import type { IMenuItem } from '@/types';
@@ -8,6 +8,11 @@ export const menus: IMenuItem[] = [
     to: AppRoute.DASHBOARD,
     label: 'dashboard', // Locale key
     icon: LayoutDashboard
+  },
+  {
+    to: AppRoute.TASKS,
+    label: 'tasks.board', // Locale key
+    icon: ClipboardList
   },
   {
     to: '/user-management',

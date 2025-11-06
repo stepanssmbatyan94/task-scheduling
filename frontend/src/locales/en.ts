@@ -88,5 +88,24 @@ export default {
   branch: {
     label: 'Branch',
     placeholder: 'Select Branch'
+  },
+
+  tasks: {
+    board: 'Task Board',
+    create: 'Create Task',
+    edit: 'Edit Task',
+    title: 'Title',
+    description: 'Description',
+    startDate: 'Start Date',
+    endDate: 'End Date',
+    assignee: 'Assignee',
+    unassigned: 'Unassigned',
+    emptyState: 'No items',
+    status: {
+      pending: 'Pending',
+      inProgress: 'In Progress',
+      completed: 'Completed',
+      cancelled: 'Cancelled'
+    }
   }
 };

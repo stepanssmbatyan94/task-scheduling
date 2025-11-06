@@ -88,5 +88,24 @@ export default {
   branch: {
     label: 'សាខា',
     placeholder: 'ជ្រើសរើសសាខា'
+  },
+
+  tasks: {
+    board: 'ក្តារកិច្ចការ',
+    create: 'បង្កើតកិច្ចការ',
+    edit: 'កែសម្រួលកិច្ចការ',
+    title: 'ចំណងជើង',
+    description: 'ការពិពណ៌នា',
+    startDate: 'ថ្ងៃចាប់ផ្តើម',
+    endDate: 'ថ្ងៃបញ្ចប់',
+    assignee: 'អ្នកទទួលខុសត្រូវ',
+    unassigned: 'មិនបានចាត់តាំង',
+    emptyState: 'គ្មានធាតុ',
+    status: {
+      pending: 'កំពុងរង់ចាំ',
+      inProgress: 'កំពុងដំណើរការ',
+      completed: 'បានបញ្ចប់',
+      cancelled: 'បានលុបចោល'
+    }
   }
 };
