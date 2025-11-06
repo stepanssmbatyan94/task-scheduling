@@ -4,42 +4,46 @@ import type {
   CreateTaskStatusForm,
   UpdateTaskStatusForm
 } from './task-status-type';
-import type { SuccessResponse } from '@/types/global';
 
 const API_ENDPOINT = 'task-statuses';
 
 export async function fetchTaskStatusesApi(): Promise<
-  SuccessResponse<TaskStatus[]>
+  TaskStatus[] | SuccessResponse<TaskStatus[]>
 > {
-  const response = await Http.get<SuccessResponse<TaskStatus[]>>(
+  const response = await Http.get<TaskStatus[] | SuccessResponse<TaskStatus[]>>(
     API_ENDPOINT
   );
-  return response as SuccessResponse<TaskStatus[]>;
+  return response as TaskStatus[] | SuccessResponse<TaskStatus[]>;
 }
 
 export async function fetchTaskStatusByIdApi(
   id: string | number
-): Promise<SuccessResponse<TaskStatus>> {
-  const response = await Http.get<SuccessResponse<TaskStatus>>(
+): Promise<TaskStatus | SuccessResponse<TaskStatus>> {
+  const response = await Http.get<TaskStatus | SuccessResponse<TaskStatus>>(
     `${API_ENDPOINT}/${id}`
   );
-  return response as SuccessResponse<TaskStatus>;
+  return response as TaskStatus | SuccessResponse<TaskStatus>;
 }
 
 export async function createTaskStatusApi(
   values: CreateTaskStatusForm
-): Promise<SuccessResponse<TaskStatus>> {
-  return await Http.post<SuccessResponse<TaskStatus>>(API_ENDPOINT, values);
+): Promise<TaskStatus | SuccessResponse<TaskStatus>> {
+  const response = await Http.post<TaskStatus | SuccessResponse<TaskStatus>>(
+    API_ENDPOINT,
+    values
+  );
+  return response as TaskStatus | SuccessResponse<TaskStatus>;
 }
 
 export async function updateTaskStatusApi(
   values: UpdateTaskStatusForm,
   id: string | number
-): Promise<SuccessResponse<TaskStatus>> {
-  return await Http.put<SuccessResponse<TaskStatus>>(
+): Promise<TaskStatus | SuccessResponse<TaskStatus>> {
+  const response = await Http.put<TaskStatus | SuccessResponse<TaskStatus>>(
     `${API_ENDPOINT}/${id}`,
     values
   );
+  return response as TaskStatus | SuccessResponse<TaskStatus>;
 }
 
 export async function deleteTaskStatusApi(

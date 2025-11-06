@@ -5,21 +5,18 @@
 import { computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { fetchTasksApi } from '../task-api';
+import { useTaskStatuses } from './useTaskStatuses';
 import type { Task } from '../task-type';
 import type { KanbanItem, Lane } from '../components/types';
 
 /**
- * Maps backend task status names to frontend lane slugs
+ * Formats status name for display (capitalize and replace hyphens)
  */
-const statusToLaneSlug = (statusName: string): string => {
-  const mapping: Record<string, string> = {
-    backlog: 'backlog',
-    todo: 'todo',
-    'in-progress': 'in-progress',
-    done: 'done',
-    blocked: 'blocked'
-  };
-  return mapping[statusName] || statusName;
+const formatStatusName = (statusName: string): string => {
+  return statusName
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 };
 
 /**
@@ -28,7 +25,7 @@ const statusToLaneSlug = (statusName: string): string => {
 const transformTaskToKanbanItem = (task: Task): KanbanItem => {
   return {
     id: task.id,
-    status: statusToLaneSlug(task.status.name),
+    status: task.status.name, // Use status name directly as slug
     title: task.title,
     summary: task.title, // For compatibility
     description: task.description || undefined,
@@ -46,15 +43,24 @@ const transformTaskToKanbanItem = (task: Task): KanbanItem => {
 };
 
 /**
- * Composable for fetching tasks from API
+ * Composable for fetching tasks and task statuses from API
  */
 export function useTasks() {
+  // Fetch task statuses using the composable
+  const {
+    taskStatuses,
+    isLoading: isLoadingStatuses,
+    isError: isErrorStatuses,
+    error: errorStatuses
+  } = useTaskStatuses();
+
+  // Fetch tasks
   const {
     data: tasksData,
-    isLoading,
-    isError,
-    error,
-    refetch
+    isLoading: isLoadingTasks,
+    isError: isErrorTasks,
+    error: errorTasks,
+    refetch: refetchTasks
   } = useQuery({
     queryKey: ['tasks', { limit: -1 }],
     queryFn: () => fetchTasksApi({ limit: -1 }),
@@ -69,37 +75,43 @@ export function useTasks() {
     return tasks.value.map(transformTaskToKanbanItem);
   });
 
+  // Create lanes from task statuses API, ordered by status.order
   const lanes = computed<Lane[]>(() => {
-    // Get unique statuses from tasks, ordered by status.order
-    const statusMap = new Map<string, { name: string; order: number }>();
-
-    tasks.value.forEach((task) => {
-      const slug = statusToLaneSlug(task.status.name);
-      if (!statusMap.has(slug)) {
-        statusMap.set(slug, {
-          name: task.status.name.charAt(0).toUpperCase() + task.status.name.slice(1).replace('-', ' '),
-          order: task.status.order
-        });
-      }
-    });
-
-    // Convert to array and sort by order
-    return Array.from(statusMap.entries())
-      .map(([slug, { name }]) => ({ name, slug }))
+    return taskStatuses.value
+      .map((status) => ({
+        name: formatStatusName(status.name),
+        slug: status.name // Use status name as slug
+      }))
       .sort((a, b) => {
-        const orderA = statusMap.get(a.slug)?.order || 0;
-        const orderB = statusMap.get(b.slug)?.order || 0;
-        return orderA - orderB;
+        const statusA = taskStatuses.value.find((s) => s.name === a.slug);
+        const statusB = taskStatuses.value.find((s) => s.name === b.slug);
+        return (statusA?.order || 0) - (statusB?.order || 0);
       });
+  });
+
+  // Combined loading state
+  const isLoading = computed(() => {
+    return isLoadingStatuses.value || isLoadingTasks.value;
+  });
+
+  // Combined error state
+  const isError = computed(() => {
+    return isErrorStatuses.value || isErrorTasks.value;
+  });
+
+  // Combined error object
+  const error = computed(() => {
+    return errorStatuses.value || errorTasks.value;
   });
 
   return {
     tasks,
     kanbanItems,
     lanes,
+    taskStatuses,
     isLoading,
     isError,
     error,
-    refetch
+    refetch: refetchTasks
   };
 }

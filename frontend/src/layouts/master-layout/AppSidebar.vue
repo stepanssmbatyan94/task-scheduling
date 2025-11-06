@@ -1,7 +1,7 @@
 <template>
-  <div :class="`app-sidebar h-dvh ${collapsed ? 'w-16' : 'w-72'}`">
+  <div :class="`app-sidebar h-dvh ${collapsed ? 'w-16' : 'w-40'}`">
     <div class="sticky top-0 self-start overflow-hidden text-nowrap mt-2">
-      <div class="flex justify-between items-center h-16 w-72 px-6">
+      <div class="flex justify-between items-center h-16 w-40 px-6">
         <div class="inline-flex">
           <img :src="logo" alt="logo" />
         </div>

@@ -36,7 +36,7 @@ export function useTaskStatuses() {
   });
 
   const taskStatuses = computed<TaskStatus[]>(() => {
-    return data.value?.data || [];
+    return data.value as TaskStatus[];
   });
 
   return {
@@ -65,7 +65,7 @@ export function useTaskStatus(id: string | number) {
   });
 
   const taskStatus = computed<TaskStatus | null>(() => {
-    return data.value?.data || null;
+    return data.value as TaskStatus | null;
   });
 
   return {
