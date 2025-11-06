@@ -3,22 +3,32 @@
     <PageBreadcrumb :items="breadcrumbItems" />
     <PageTitle :name="t('tasks.board')" :show-back-button="false">
       <template #actionButton>
-        <AddNewButton @click="openCreateModal" :label="t('tasks.create')" />
+        <Button
+          :label="t('tasks.create')"
+          icon="pi pi-plus"
+          @click="openCreateModal"
+        />
       </template>
     </PageTitle>
 
     <PageContent>
       <Card class="p-4">
-        <div v-if="items.length > 0" class="kanban-wrapper">
+        <div v-if="isLoading" class="text-center py-8">
+          <p class="text-gray-500">Loading tasks...</p>
+        </div>
+        <div v-else-if="isError" class="text-center py-8 text-red-500">
+          <p>Error loading tasks. Please try again.</p>
+        </div>
+        <div v-else-if="kanbanItems.length > 0" class="kanban-wrapper">
           <KanbanBoard
-            :items="items"
+            :items="kanbanItems"
             :lanes="lanes"
             @item-updated="handleItemUpdated"
             @item-clicked="handleItemClicked"
           />
         </div>
         <div v-else class="text-center py-8 text-gray-500">
-          No tasks available
+          {{ t('tasks.emptyState') }}
         </div>
       </Card>
     </PageContent>
@@ -27,11 +37,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-
 import { KanbanBoard } from '../../components';
+import { useTasks } from '../../composables/useTasks';
 
 import {
-  AddNewButton,
+  Button,
   Card,
   PageBreadcrumb,
   PageContent,
@@ -39,62 +49,18 @@ import {
 } from '@/components';
 import { useTranslation } from '@/composables';
 import type { BreadcrumbItemProps } from '@/types';
+import type { KanbanItem } from '../../components/types';
 
 const { t } = useTranslation();
 
-// Kanban board data
-const lanes = ref([
-  { name: 'Pending', slug: 'pending' },
-  { name: 'In Progress', slug: 'in-progress' },
-  { name: 'Completed', slug: 'completed' },
-  { name: 'Cancelled', slug: 'cancelled' }
-]);
-
-const items = ref([
-  {
-    id: 1,
-    status: 'pending',
-    summary: 'Sample Task 1',
-    description: 'This is a sample task description for the pending column.',
-    assignedUser: {
-      id: 1,
-      firstName: 'John',
-      lastName: 'Doe'
-    },
-    endDate: '2025-01-20T00:00:00Z'
-  },
-  {
-    id: 2,
-    status: 'pending',
-    summary: 'Another Pending Task',
-    description: 'Another task that needs to be done.',
-    endDate: '2025-01-25T00:00:00Z'
-  },
-  {
-    id: 3,
-    status: 'in-progress',
-    summary: 'Task in Progress',
-    description: 'This task is currently being worked on.',
-    assignedUser: {
-      id: 2,
-      firstName: 'Jane',
-      lastName: 'Smith'
-    },
-    endDate: '2025-01-30T00:00:00Z'
-  },
-  {
-    id: 4,
-    status: 'completed',
-    summary: 'Completed Task',
-    description: 'This task has been completed successfully.',
-    assignedUser: {
-      id: 1,
-      firstName: 'John',
-      lastName: 'Doe'
-    },
-    endDate: '2025-01-15T00:00:00Z'
-  }
-]);
+// Fetch tasks from API
+const {
+  kanbanItems,
+  lanes,
+  isLoading,
+  isError,
+  refetch
+} = useTasks();
 
 // Breadcrumb
 const breadcrumbItems = ref<BreadcrumbItemProps[]>([
@@ -107,17 +73,14 @@ const breadcrumbItems = ref<BreadcrumbItemProps[]>([
 ]);
 
 // Event handlers
-const handleItemUpdated = (item: any, newStatus: string) => {
+const handleItemUpdated = (item: KanbanItem, newStatus: string) => {
   console.log('Item updated:', item, 'New status:', newStatus);
-  // Update the item in the local array
-  const index = items.value.findIndex((i) => i.id === item.id);
-  if (index !== -1) {
-    items.value[index] = { ...item, status: newStatus };
-  }
   // TODO: Update task via API
+  // After successful update, refetch tasks
+  // refetch();
 };
 
-const handleItemClicked = (item: any) => {
+const handleItemClicked = (item: KanbanItem) => {
   console.log('Item clicked:', item);
   // TODO: Open task details modal
 };

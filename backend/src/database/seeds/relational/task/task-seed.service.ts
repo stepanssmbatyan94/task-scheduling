@@ -57,7 +57,8 @@ export class TaskSeedService {
         // 1 task with backlog status
         {
           title: 'Research new technologies',
-          description: 'Investigate and evaluate new technologies for the project',
+          description:
+            'Investigate and evaluate new technologies for the project',
           status: backlogStatus,
           assignedUser: users[0] || null,
           startDate: null,

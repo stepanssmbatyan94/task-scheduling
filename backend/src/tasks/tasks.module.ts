@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 
 import { TasksController } from './tasks.controller';
+import { TaskStatusesController } from './task-statuses.controller';
 
 import { TasksService } from './tasks.service';
+import { TaskStatusesService } from './task-statuses.service';
 import { RelationalTaskPersistenceModule } from './infrastructure/persistence/relational/relational-persistence.module';
 import { DatabaseConfig } from '../database/config/database-config.type';
 import databaseConfig from '../database/config/database.config';
@@ -21,10 +23,11 @@ const infrastructurePersistenceModule = (databaseConfig() as DatabaseConfig)
       ? [infrastructurePersistenceModule]
       : []),
   ],
-  controllers: [TasksController],
-  providers: [TasksService],
+  controllers: [TasksController, TaskStatusesController],
+  providers: [TasksService, TaskStatusesService],
   exports: [
     TasksService,
+    TaskStatusesService,
     ...(infrastructurePersistenceModule
       ? [infrastructurePersistenceModule]
       : []),
