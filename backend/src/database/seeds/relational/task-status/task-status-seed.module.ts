@@ -9,4 +9,3 @@ import { TaskStatusEntity } from '../../../../tasks/infrastructure/persistence/r
   exports: [TaskStatusSeedService],
 })
 export class TaskStatusSeedModule {}
-
