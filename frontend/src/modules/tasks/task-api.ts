@@ -1,15 +1,15 @@
 import { Http } from '@/services/Http';
-import type { TasksResponse } from './task-type';
+import type { Task, TasksResponse, UpdateTaskPayload } from './task-type';
 
 const API_ENDPOINT = 'tasks';
 
 export async function fetchTasksApi(params?: {
   limit?: number;
   page?: number;
-  filters?: Record<string, any>;
-  sort?: Record<string, any>;
+  filters?: Record<string, unknown>;
+  sort?: Record<string, unknown>;
 }): Promise<TasksResponse> {
-  const queryParams: Record<string, any> = {};
+  const queryParams: Record<string, unknown> = {};
 
   if (params?.limit !== undefined) {
     queryParams.limit = params.limit;
@@ -29,4 +29,12 @@ export async function fetchTasksApi(params?: {
 
   const response = await Http.get<TasksResponse>(API_ENDPOINT, queryParams);
   return response as TasksResponse;
+}
+
+export async function updateTaskApi(
+  id: string | number,
+  values: UpdateTaskPayload
+): Promise<Task> {
+  const response = await Http.patch<Task, UpdateTaskPayload>(`${API_ENDPOINT}/${id}`, values);
+  return response as Task;
 }

@@ -4,20 +4,41 @@ import queryString from 'query-string';
 import axios from '@/config/axios';
 
 export class Http {
-  private static getError = (error: any) => {
-    if (error.code === 'ERR_CANCELED') {
-      console.log('Request aborted:', error.message);
-    } else if (error.response) {
-      const { data, status, statusText } = error.response;
-      throw data != '' ? data : { message: `${status} ${statusText}` };
-    } else {
+  private static getError = (error: unknown) => {
+    type AxiosErrorLike = {
+      code?: string;
+      message?: string;
+      response?: {
+        data?: unknown;
+        status: number;
+        statusText: string;
+      };
+    };
+
+    const axiosError = error as AxiosErrorLike | undefined;
+
+    if (axiosError?.code === 'ERR_CANCELED') {
+      console.log('Request aborted:', axiosError.message ?? 'unknown reason');
+      return;
+    }
+
+    if (axiosError?.response) {
+      const { data, status, statusText } = axiosError.response;
+      throw data !== '' && data !== undefined
+        ? data
+        : { message: `${status} ${statusText}` };
+    }
+
+    if (error instanceof Error) {
       throw error;
     }
+
+    throw new Error(String(error));
   };
 
-  static async get<T = any>(
+  static async get<T = unknown>(
     url: string,
-    queryParams?: Record<string, any> | undefined,
+    queryParams?: Record<string, unknown> | undefined,
     config?: AxiosRequestConfig
   ) {
     try {
@@ -27,34 +48,55 @@ export class Http {
       }
       const res = await axios.get<T>(url, config);
       return res?.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       Http.getError(error);
     }
   }
 
-  static async post<T = any, D = any>(url: string, data: D, config?: AxiosRequestConfig) {
+  static async post<T = unknown, D = unknown>(
+    url: string,
+    data: D,
+    config?: AxiosRequestConfig
+  ) {
     try {
       const res = await axios.post<T>(url, data, config);
       return res?.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       Http.getError(error);
     }
   }
 
-  static async put<T = any, D = any>(url: string, data: D, config?: AxiosRequestConfig) {
+  static async put<T = unknown, D = unknown>(
+    url: string,
+    data: D,
+    config?: AxiosRequestConfig
+  ) {
     try {
       const res = await axios.put<T>(url, data, config);
       return res?.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       Http.getError(error);
     }
   }
 
-  static async delete<T = any>(url: string, config?: AxiosRequestConfig) {
+  static async patch<T = unknown, D = unknown>(
+    url: string,
+    data: D,
+    config?: AxiosRequestConfig
+  ) {
+    try {
+      const res = await axios.patch<T>(url, data, config);
+      return res?.data;
+    } catch (error: unknown) {
+      Http.getError(error);
+    }
+  }
+
+  static async delete<T = unknown>(url: string, config?: AxiosRequestConfig) {
     try {
       const res = await axios.delete<T>(url, config);
       return res?.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       Http.getError(error);
     }
   }

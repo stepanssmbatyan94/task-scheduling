@@ -3,11 +3,14 @@
  */
 
 import { computed } from 'vue';
-import { useQuery } from '@tanstack/vue-query';
-import { fetchTasksApi } from '../task-api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import { fetchTasksApi, updateTaskApi } from '../task-api';
 import { useTaskStatuses } from './useTaskStatuses';
-import type { Task } from '../task-type';
+import type { Task, TasksResponse } from '../task-type';
 import type { KanbanItem, Lane } from '../components/types';
+
+const TASKS_QUERY_KEY = ['tasks'] as const;
+const TASKS_QUERY_PARAMS = { limit: -1 } as const;
 
 /**
  * Formats status name for display (capitalize and replace hyphens)
@@ -46,6 +49,9 @@ const transformTaskToKanbanItem = (task: Task): KanbanItem => {
  * Composable for fetching tasks and task statuses from API
  */
 export function useTasks() {
+  const queryClient = useQueryClient();
+  const tasksQueryKey = [...TASKS_QUERY_KEY, TASKS_QUERY_PARAMS] as const;
+
   // Fetch task statuses using the composable
   const {
     taskStatuses,
@@ -62,9 +68,67 @@ export function useTasks() {
     error: errorTasks,
     refetch: refetchTasks
   } = useQuery({
-    queryKey: ['tasks', { limit: -1 }],
-    queryFn: () => fetchTasksApi({ limit: -1 }),
-    staleTime: 30000 // 30 seconds
+    queryKey: tasksQueryKey,
+    queryFn: () => fetchTasksApi(TASKS_QUERY_PARAMS),
+    staleTime: 30000
+  });
+
+  const {
+    mutateAsync: updateTaskStatus,
+    isPending: isUpdatingTaskStatus,
+    isError: isUpdatingTaskStatusError,
+    error: updateTaskStatusError
+  } = useMutation<
+    Task,
+    unknown,
+    {
+      id: Task['id'];
+      statusId: number | string;
+      statusName: string;
+    },
+    { previousData?: TasksResponse }
+  >({
+    mutationFn: ({ id, statusId }) =>
+      updateTaskApi(id, {
+        status: {
+          id: statusId
+        }
+      }),
+    onMutate: async ({ id, statusId, statusName }) => {
+      await queryClient.cancelQueries({ queryKey: TASKS_QUERY_KEY });
+
+      const previousData = queryClient.getQueryData<TasksResponse>(tasksQueryKey);
+
+      if (previousData) {
+        const updatedData: TasksResponse = {
+          ...previousData,
+          data: previousData.data.map((task) =>
+            task.id === id
+              ? {
+                  ...task,
+                  status: {
+                    ...task.status,
+                    id: +statusId,
+                    name: statusName
+                  }
+                }
+              : task
+          )
+        };
+
+        queryClient.setQueryData(tasksQueryKey, updatedData);
+      }
+
+      return { previousData };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(tasksQueryKey, context.previousData);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });
+    }
   });
 
   const tasks = computed<Task[]>(() => {
@@ -112,6 +176,10 @@ export function useTasks() {
     isLoading,
     isError,
     error,
-    refetch: refetchTasks
+    refetch: refetchTasks,
+    updateTaskStatus,
+    isUpdatingTaskStatus,
+    isUpdatingTaskStatusError,
+    updateTaskStatusError
   };
 }

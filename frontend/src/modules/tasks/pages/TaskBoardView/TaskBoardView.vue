@@ -26,6 +26,18 @@
             @item-updated="handleItemUpdated"
             @item-clicked="handleItemClicked"
           />
+          <div
+            v-if="isUpdatingTaskStatus"
+            class="mt-4 text-center text-gray-500 text-sm"
+          >
+            Updating task status...
+          </div>
+          <div
+            v-else-if="updateTaskStatusError"
+            class="mt-4 text-center text-red-500 text-sm"
+          >
+            Failed to update task status. Please try again.
+          </div>
         </div>
         <div v-else class="text-center py-8 text-gray-500">
           {{ t('tasks.emptyState') }}
@@ -57,9 +69,12 @@ const { t } = useTranslation();
 const {
   kanbanItems,
   lanes,
+  taskStatuses,
   isLoading,
   isError,
-  refetch
+  updateTaskStatus,
+  isUpdatingTaskStatus,
+  updateTaskStatusError
 } = useTasks();
 
 // Breadcrumb
@@ -73,11 +88,41 @@ const breadcrumbItems = ref<BreadcrumbItemProps[]>([
 ]);
 
 // Event handlers
-const handleItemUpdated = (item: KanbanItem, newStatus: string) => {
-  console.log('Item updated:', item, 'New status:', newStatus);
-  // TODO: Update task via API
-  // After successful update, refetch tasks
-  // refetch();
+const handleItemUpdated = async (item: KanbanItem, newStatus: string) => {
+  if (item.id === undefined || item.id === null) {
+    console.warn('Unable to update task status: missing task identifier', item);
+    return;
+  }
+
+  const nextStatus = taskStatuses.value.find(
+    (status) => status.name === newStatus
+  );
+
+  if (!nextStatus) {
+    console.warn(`Unable to update task status: status "${newStatus}" not found`);
+    return;
+  }
+
+  const taskId =
+    typeof item.id === 'string' ? Number.parseInt(item.id, 10) : item.id;
+
+  if (Number.isNaN(taskId)) {
+    console.warn('Unable to update task status: invalid task identifier', item);
+    return;
+  }
+
+  try {
+    await updateTaskStatus({
+      id: taskId,
+      statusId: nextStatus.id,
+      statusName: nextStatus.name
+    });
+  } catch (error) {
+    console.error(
+      'Failed to update task status',
+      error || updateTaskStatusError.value
+    );
+  }
 };
 
 const handleItemClicked = (item: KanbanItem) => {
