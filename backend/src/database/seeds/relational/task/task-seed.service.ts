@@ -64,8 +64,8 @@ export class TaskSeedService {
             'Investigate and evaluate new technologies for the project',
           status: backlogStatus,
           assignedUser: users[0] || null,
-          startDate: null,
-          endDate: null,
+          startDate: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+          endDate: new Date(now.getTime()), // Today
         },
         // 2 tasks with todo status
         {
@@ -81,7 +81,7 @@ export class TaskSeedService {
           description: 'Configure development tools and environment setup',
           status: todoStatus,
           assignedUser: users[1] || null,
-          startDate: null,
+          startDate: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
           endDate: new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000), // 4 days from now
         },
         // 3 tasks with in-progress status
@@ -90,8 +90,8 @@ export class TaskSeedService {
           description: 'Develop user authentication and authorization features',
           status: inProgressStatus,
           assignedUser: users[0] || null,
-          startDate: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-          endDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
+          startDate: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000), // 20 days ago
+          endDate: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000), // 12 days ago
         },
         {
           title: 'Create API endpoints',
@@ -99,7 +99,7 @@ export class TaskSeedService {
           status: inProgressStatus,
           assignedUser: users[1] || null,
           startDate: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000), // Yesterday
-          endDate: null,
+          endDate: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000), // Tomorrow
         },
         {
           title: 'Write unit tests',
@@ -122,7 +122,7 @@ export class TaskSeedService {
           title: 'Database schema design',
           description: 'Design and create database schema for the application',
           status: doneStatus,
-          assignedUser: users[1] || null,
+          assignedUser: null,
           startDate: new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000), // 8 days ago
           endDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
         },
