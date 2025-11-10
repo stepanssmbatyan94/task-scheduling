@@ -106,6 +106,13 @@ export default {
       inProgress: 'In Progress',
       completed: 'Completed',
       cancelled: 'Cancelled'
+    },
+    dueDate: {
+      tooltip: {
+        overdue: 'Task expired {count} day ago | Task expired {count} days ago',
+        today: 'Task is due today',
+        upcoming: 'Due in {count} day | Due in {count} days'
+      }
     }
   }
 };

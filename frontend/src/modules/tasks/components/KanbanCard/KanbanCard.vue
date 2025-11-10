@@ -34,7 +34,12 @@
         {{ item.assignedUser.firstName }} {{ item.assignedUser.lastName }}
       </span>
       <div class="kanban-card-footer-right">
-        <span v-if="item.endDate" class="kanban-card-date">
+        <span
+          v-if="item.endDate"
+          :class="['kanban-card-date', dueDateClass]"
+          :title="dueDateTooltip"
+        >
+          <i class="pi pi-clock kanban-card-date-icon" aria-hidden="true"></i>
           {{ formatDate(item.endDate) }}
         </span>
       </div>
@@ -77,8 +82,93 @@ const handleAssignClick = () => {
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString();
+
+  if (Number.isNaN(date.getTime())) {
+    return dateString;
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric'
+  }).format(date);
 };
+
+type DueDateVariant = 'overdue' | 'today' | 'upcoming' | undefined;
+
+const dueDateDayDifference = computed<number | undefined>(() => {
+  const rawDate = props.item.endDate;
+
+  if (!rawDate) {
+    return undefined;
+  }
+
+  const dueDate = new Date(rawDate);
+
+  if (Number.isNaN(dueDate.getTime())) {
+    return undefined;
+  }
+
+  const dueDateStart = new Date(
+    dueDate.getFullYear(),
+    dueDate.getMonth(),
+    dueDate.getDate()
+  );
+  const now = new Date();
+  const todayStart = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+
+  const diffInMs = dueDateStart.getTime() - todayStart.getTime();
+
+  return Math.round(diffInMs / (1000 * 60 * 60 * 24));
+});
+
+const dueDateVariant = computed<DueDateVariant>(() => {
+  const diffInDays = dueDateDayDifference.value;
+
+  if (diffInDays === undefined) {
+    return undefined;
+  }
+
+  if (diffInDays < 0) {
+    return 'overdue';
+  }
+
+  if (diffInDays === 0) {
+    return 'today';
+  }
+
+  return 'upcoming';
+});
+
+const dueDateClass = computed(() =>
+  dueDateVariant.value ? `kanban-card-date--${dueDateVariant.value}` : undefined
+);
+
+const dueDateTooltip = computed(() => {
+  const diffInDays = dueDateDayDifference.value;
+
+  if (diffInDays === undefined) {
+    return undefined;
+  }
+
+  switch (dueDateVariant.value) {
+    case 'overdue':
+      return t('tasks.dueDate.tooltip.overdue', {
+        count: Math.abs(diffInDays)
+      });
+    case 'today':
+      return t('tasks.dueDate.tooltip.today');
+    case 'upcoming':
+      return t('tasks.dueDate.tooltip.upcoming', {
+        count: diffInDays
+      });
+    default:
+      return undefined;
+  }
+});
 
 const unassignedText = computed(() => t('tasks.unassigned'));
 

@@ -87,6 +87,36 @@
   margin-left: auto;
 }
 
+.kanban-card-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: help;
+}
+
+.kanban-card-date-icon {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.kanban-card-date--overdue {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.kanban-card-date--today {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.kanban-card-date--upcoming {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
 .kanban-card-avatar {
   flex-shrink: 0;
 }
