@@ -116,6 +116,10 @@ export default {
       assignedUser: 'Выберите исполнителя',
       status: 'Выберите статус'
     },
+    filters: {
+      assignedUsersPlaceholder: 'Фильтр по исполнителям',
+      clearAssignedUsers: 'Очистить'
+    },
     messages: {
       loading: 'Загрузка задач...',
       loadError: 'Не удалось загрузить задачи. Повторите попытку.',

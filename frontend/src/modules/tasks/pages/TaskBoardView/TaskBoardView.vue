@@ -13,6 +13,29 @@
 
     <PageContent>
       <Card class="p-4">
+        <div class="task-board-filters">
+          <MultiSelect
+            v-model="selectedUserIds"
+            :options="userFilterOptions"
+            option-label="label"
+            option-value="value"
+            display="chip"
+            :loading="assignmentLoading"
+            :disabled="assignmentLoading"
+            :placeholder="t('tasks.filters.assignedUsersPlaceholder')"
+            class="task-board-filters__multiselect"
+          />
+          <Button
+            v-if="selectedUserIds.length > 0"
+            severity="secondary"
+            size="small"
+            icon="pi pi-times"
+            :label="t('tasks.filters.clearAssignedUsers')"
+            class="task-board-filters__clear"
+            @click="clearSelectedUsers"
+          />
+        </div>
+
         <div v-if="isLoading" class="text-center py-8">
           <p class="text-gray-500">{{ t('tasks.messages.loading') }}</p>
         </div>
@@ -90,7 +113,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import MultiSelect from 'primevue/multiselect';
 import { KanbanBoard, TaskFormModal, TaskViewModal } from '../../components';
 import { useTasks } from '../../composables/useTasks';
 import { useAssignableUsers } from '../../composables/useAssignableUsers';
@@ -110,6 +134,22 @@ import { toast } from 'vue3-toastify';
 
 const { t } = useTranslation();
 
+const selectedUserIds = ref<string[]>([]);
+const taskFilters = computed(() => {
+  if (selectedUserIds.value.length === 0) {
+    return undefined;
+  }
+
+  return {
+    assignedUsers: selectedUserIds.value.map((id) => {
+      const numericId = Number(id);
+      return {
+        id: Number.isNaN(numericId) ? id : numericId
+      };
+    })
+  };
+});
+
 // Fetch tasks from API
 const {
   tasks,
@@ -128,7 +168,7 @@ const {
   updateTask,
   isUpdatingTask,
   updateTaskError
-} = useTasks();
+} = useTasks({ filters: taskFilters });
 
 const {
   assignableUsers,
@@ -141,12 +181,27 @@ const assignmentLoading = computed(
   () => isLoadingAssignableUsers.value || isFetchingAssignableUsers.value
 );
 
+const userFilterOptions = computed(() => {
+  return (assignableUsers.value ?? []).map((user) => ({
+    label: formatUserDisplayName(user),
+    value: String(user.id)
+  }));
+});
+
+watch(
+  assignableUsers,
+  (users) => {
+    const validIds = new Set((users ?? []).map((user) => String(user.id)));
+    selectedUserIds.value = selectedUserIds.value.filter((id) => validIds.has(id));
+  },
+  { immediate: true }
+);
+
 const showCreateModal = ref(false);
 const isViewModalOpen = ref(false);
 const isEditModalOpen = ref(false);
 const selectedTask = ref<Task | null>(null);
 
-// Breadcrumb
 const breadcrumbItems = ref<BreadcrumbItemProps[]>([
   {
     title: t('dashboard')
@@ -156,7 +211,6 @@ const breadcrumbItems = ref<BreadcrumbItemProps[]>([
   }
 ]);
 
-// Event handlers
 const handleItemUpdated = async (item: KanbanItem, newStatus: string) => {
   if (item.id === undefined || item.id === null) {
     console.warn('Unable to update task status: missing task identifier', item);
@@ -285,6 +339,23 @@ const handleUpdateTask = async (payload: CreateTaskPayload) => {
   } catch (error) {
     console.error('Failed to update task', error || updateTaskError.value);
   }
+};
+
+const clearSelectedUsers = () => {
+  selectedUserIds.value = [];
+};
+
+const formatUserDisplayName = (user: AssignableUser): string => {
+  const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
+  if (fullName) {
+    return fullName;
+  }
+
+  if (user.email) {
+    return user.email;
+  }
+
+  return t('tasks.unassigned');
 };
 </script>
 

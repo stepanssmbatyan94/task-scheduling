@@ -116,6 +116,10 @@ export default {
       assignedUser: 'Select a team member',
       status: 'Select status'
     },
+    filters: {
+      assignedUsersPlaceholder: 'Filter by assignees',
+      clearAssignedUsers: 'Clear'
+    },
     messages: {
       loading: 'Loading tasks...',
       loadError: 'Error loading tasks. Please try again.',

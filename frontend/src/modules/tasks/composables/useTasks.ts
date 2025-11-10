@@ -2,6 +2,7 @@
  * Composable for fetching and managing tasks
  */
 
+import type { Ref } from 'vue';
 import { computed } from 'vue';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import { fetchTasksApi, updateTaskApi, createTaskApi } from '../task-api';
@@ -17,7 +18,10 @@ import type {
 import type { KanbanItem, Lane } from '../components/types';
 
 const TASKS_QUERY_KEY = ['tasks'] as const;
-const TASKS_QUERY_PARAMS = { limit: -1 } as const;
+
+type TaskFilters = {
+  assignedUsers?: Array<{ id: number | string }>;
+} | undefined;
 
 /**
  * Formats status name for display (capitalize and replace hyphens)
@@ -55,11 +59,24 @@ const transformTaskToKanbanItem = (task: Task): KanbanItem => {
 /**
  * Composable for fetching tasks and task statuses from API
  */
-export function useTasks() {
+export function useTasks(options: { filters?: Ref<TaskFilters> } = {}) {
   const queryClient = useQueryClient();
-  const tasksQueryKey = [...TASKS_QUERY_KEY, TASKS_QUERY_PARAMS] as const;
+  const filtersRef = options.filters;
+  const tasksQueryParams = computed(() => {
+    const params: Record<string, unknown> = {
+      limit: -1
+    };
 
-  // Fetch task statuses using the composable
+    if (filtersRef?.value) {
+      params.filters = filtersRef.value;
+    }
+
+    return params;
+  });
+  const tasksQueryKey = computed(() => [...TASKS_QUERY_KEY, tasksQueryParams.value] as const);
+  const resolveCurrentQueryKey = () => tasksQueryKey.value;
+
+
   const {
     taskStatuses,
     isLoading: isLoadingStatuses,
@@ -67,7 +84,6 @@ export function useTasks() {
     error: errorStatuses
   } = useTaskStatuses();
 
-  // Fetch tasks
   const {
     data: tasksData,
     isLoading: isLoadingTasks,
@@ -76,7 +92,13 @@ export function useTasks() {
     refetch: refetchTasks
   } = useQuery({
     queryKey: tasksQueryKey,
-    queryFn: () => fetchTasksApi(TASKS_QUERY_PARAMS),
+    queryFn: ({ queryKey }) => {
+      const [, params] = queryKey as unknown as [
+        typeof TASKS_QUERY_KEY[number],
+        Record<string, unknown>
+      ];
+      return fetchTasksApi(params);
+    },
     staleTime: 30000
   });
 
@@ -104,7 +126,8 @@ export function useTasks() {
     onMutate: async ({ id, statusId, statusName }) => {
       await queryClient.cancelQueries({ queryKey: TASKS_QUERY_KEY });
 
-      const previousData = queryClient.getQueryData<TasksResponse>(tasksQueryKey);
+      const currentQueryKey = resolveCurrentQueryKey();
+      const previousData = queryClient.getQueryData<TasksResponse>(currentQueryKey);
 
       if (previousData) {
         const updatedData: TasksResponse = {
@@ -123,14 +146,14 @@ export function useTasks() {
           )
         };
 
-        queryClient.setQueryData(tasksQueryKey, updatedData);
+        queryClient.setQueryData(currentQueryKey, updatedData);
       }
 
       return { previousData };
     },
     onError: (_error, _variables, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(tasksQueryKey, context.previousData);
+        queryClient.setQueryData(resolveCurrentQueryKey(), context.previousData);
       }
     },
     onSettled: () => {
@@ -167,7 +190,8 @@ export function useTasks() {
     onMutate: async ({ id, user }) => {
       await queryClient.cancelQueries({ queryKey: TASKS_QUERY_KEY });
 
-      const previousData = queryClient.getQueryData<TasksResponse>(tasksQueryKey);
+      const currentQueryKey = resolveCurrentQueryKey();
+      const previousData = queryClient.getQueryData<TasksResponse>(currentQueryKey);
 
       if (previousData) {
         const updatedData: TasksResponse = {
@@ -195,18 +219,18 @@ export function useTasks() {
           )
         };
 
-        queryClient.setQueryData(tasksQueryKey, updatedData);
+        queryClient.setQueryData(currentQueryKey, updatedData);
       }
 
       return { previousData };
     },
     onError: (_error, _variables, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(tasksQueryKey, context.previousData);
+        queryClient.setQueryData(resolveCurrentQueryKey(), context.previousData);
       }
     },
     onSuccess: (updatedTask) => {
-      queryClient.setQueryData<TasksResponse | undefined>(tasksQueryKey, (previous) => {
+      queryClient.setQueryData<TasksResponse | undefined>(resolveCurrentQueryKey(), (previous) => {
         if (!previous) {
           return previous;
         }
@@ -237,11 +261,12 @@ export function useTasks() {
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: TASKS_QUERY_KEY });
 
-      const previousData = queryClient.getQueryData<TasksResponse>(tasksQueryKey);
+      const currentQueryKey = resolveCurrentQueryKey();
+      const previousData = queryClient.getQueryData<TasksResponse>(currentQueryKey);
       return { previousData };
     },
     onSuccess: (createdTask) => {
-      queryClient.setQueryData<TasksResponse | undefined>(tasksQueryKey, (previous) => {
+      queryClient.setQueryData<TasksResponse | undefined>(resolveCurrentQueryKey(), (previous) => {
         if (!previous) {
           return previous;
         }
@@ -254,7 +279,7 @@ export function useTasks() {
     },
     onError: (_error, _variables, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(tasksQueryKey, context.previousData);
+        queryClient.setQueryData(resolveCurrentQueryKey(), context.previousData);
       }
     },
     onSettled: () => {
@@ -270,7 +295,7 @@ export function useTasks() {
   } = useMutation<Task, unknown, { id: Task['id']; values: UpdateTaskPayload }>({
     mutationFn: ({ id, values }) => updateTaskApi(id, values),
     onSuccess: (updatedTask) => {
-      queryClient.setQueryData<TasksResponse | undefined>(tasksQueryKey, (previous) => {
+      queryClient.setQueryData<TasksResponse | undefined>(resolveCurrentQueryKey(), (previous) => {
         if (!previous) {
           return previous;
         }

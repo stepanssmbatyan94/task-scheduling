@@ -22,6 +22,12 @@ export class FilterTaskDto {
   @Type(() => UserDto)
   assignedUser?: UserDto | null;
 
+  @ApiPropertyOptional({ type: () => UserDto, isArray: true })
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => UserDto)
+  assignedUsers?: UserDto[] | null;
+
   @ApiPropertyOptional({ type: () => TaskStatusDto })
   @IsOptional()
   @ValidateNested()

@@ -9,6 +9,22 @@
   min-height: 600px;
 }
 
+.task-board-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.task-board-filters__multiselect {
+  min-width: 16rem;
+}
+
+.task-board-filters__clear {
+  flex-shrink: 0;
+}
+
 .kanban-feedback {
   margin-top: 1rem;
   display: flex;

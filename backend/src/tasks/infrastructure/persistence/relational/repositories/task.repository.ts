@@ -52,35 +52,53 @@ export class TasksRelationalRepository implements TaskRepository {
       .leftJoinAndSelect('availability.user', 'assignedUser')
       .leftJoinAndSelect('task.status', 'status');
 
+    let hasWhereClause = false;
+    const applyFilter = (
+      clause: string,
+      parameters: Record<string, unknown>,
+    ) => {
+      if (hasWhereClause) {
+        queryBuilder.andWhere(clause, parameters);
+      } else {
+        queryBuilder.where(clause, parameters);
+        hasWhereClause = true;
+      }
+    };
+
     if (filterOptions?.search) {
-      queryBuilder.where(
+      applyFilter(
         '(task.title ILIKE :search OR task.description ILIKE :search)',
         { search: `%${filterOptions.search}%` },
       );
     }
 
+    const assignedUserIds = new Set<number>();
+
     if (filterOptions?.assignedUser?.id) {
-      if (filterOptions?.search) {
-        queryBuilder.andWhere('availability.userId = :userId', {
-          userId: Number(filterOptions.assignedUser.id),
-        });
-      } else {
-        queryBuilder.where('availability.userId = :userId', {
-          userId: Number(filterOptions.assignedUser.id),
-        });
-      }
+      assignedUserIds.add(Number(filterOptions.assignedUser.id));
+    }
+
+    if (filterOptions?.assignedUsers?.length) {
+      filterOptions.assignedUsers.forEach((user) => {
+        const numericId = Number(user.id);
+        if (!Number.isNaN(numericId)) {
+          assignedUserIds.add(numericId);
+        }
+      });
+    }
+
+    const assignedUserIdList = Array.from(assignedUserIds.values());
+
+    if (assignedUserIdList.length > 0) {
+      applyFilter('availability.userId IN (:...userIds)', {
+        userIds: assignedUserIdList,
+      });
     }
 
     if (filterOptions?.status?.id) {
-      if (filterOptions?.search || filterOptions?.assignedUser?.id) {
-        queryBuilder.andWhere('task.statusId = :statusId', {
-          statusId: Number(filterOptions.status.id),
-        });
-      } else {
-        queryBuilder.where('task.statusId = :statusId', {
-          statusId: Number(filterOptions.status.id),
-        });
-      }
+      applyFilter('task.statusId = :statusId', {
+        statusId: Number(filterOptions.status.id),
+      });
     }
 
     if (sortOptions?.length) {
