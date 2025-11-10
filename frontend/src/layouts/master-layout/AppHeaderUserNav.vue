@@ -66,11 +66,8 @@ function handleLogout() {
           </div>
         </span>
       </template>
-      <template #submenuitem="{ item }">
-        <span class="text-primary">{{ item.label }}</span>
-      </template>
       <template #item="{ item, props }">
-        <a class="flex items-center" v-bind="props.action" @click="item.action">
+        <a class="flex items-center text-primary" v-bind="props.action" @click="item.action">
           <span :class="item.icon" />
           <span>{{ item.label }}</span>
           <span

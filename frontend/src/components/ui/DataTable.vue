@@ -7,15 +7,14 @@
       :header="col.title"
       style="width: 25%"
     >
-      <template #body="{ data, field }">
-        <span>
+      <template #body="{ data }">
+        <slot :name="col.key" :row="data as T">
           {{
             col.render
               ? col.render(data)
-              : (data[field] ?? (col.displayDashIfValueIsNull ? '-' : ''))
+              : resolveCellValue(data, col)
           }}
-          <slot :name="col.key" :row="data as T" />
-        </span>
+        </slot>
       </template>
     </Column>
 
@@ -44,4 +43,12 @@ type DataTableProps = {
 };
 
 defineProps<DataTableProps>();
+
+const resolveCellValue = (row: T, column: ColumnProps<T>) => {
+  if ('dataIndex' in column && column.dataIndex) {
+    return row[column.dataIndex as keyof T] ?? (column.displayDashIfValueIsNull ? '-' : '');
+  }
+
+  return '';
+};
 </script>
