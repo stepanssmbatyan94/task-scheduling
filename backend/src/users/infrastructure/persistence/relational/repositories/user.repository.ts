@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { FindOptionsWhere, Repository, In } from 'typeorm';
+import { FindManyOptions, FindOptionsWhere, Repository, In } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { NullableType } from '../../../../../utils/types/nullable.type';
 import { FilterUserDto, SortUserDto } from '../../../../dto/query-user.dto';
@@ -41,18 +41,29 @@ export class UsersRelationalRepository implements UserRepository {
       }));
     }
 
-    const entities = await this.usersRepository.find({
-      skip: (paginationOptions.page - 1) * paginationOptions.limit,
-      take: paginationOptions.limit,
-      where: where,
-      order: sortOptions?.reduce(
-        (accumulator, sort) => ({
+    const order = sortOptions?.reduce(
+      (accumulator, sort) => {
+        const direction = sort.order?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+        return {
           ...accumulator,
-          [sort.orderBy]: sort.order,
-        }),
-        {},
-      ),
-    });
+          [sort.orderBy]: direction,
+        };
+      },
+      {} as Record<string, 'ASC' | 'DESC'>,
+    );
+
+    const options: FindManyOptions<UserEntity> = {
+      where: where,
+      order: order && Object.keys(order).length ? order : { createdAt: 'DESC' },
+    };
+
+    if (paginationOptions.limit !== -1) {
+      options.skip = (paginationOptions.page - 1) * paginationOptions.limit;
+      options.take = paginationOptions.limit;
+    }
+
+    const entities = await this.usersRepository.find(options);
 
     return entities.map((user) => UserMapper.toDomain(user));
   }

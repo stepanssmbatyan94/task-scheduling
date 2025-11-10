@@ -71,22 +71,23 @@ export class UsersController {
     @Query() query: QueryUserDto,
   ): Promise<InfinityPaginationResponseDto<User>> {
     const page = query?.page ?? 1;
-    let limit = query?.limit ?? 10;
-    if (limit > 50) {
-      limit = 50;
-    }
+    const limit = query?.limit ?? 20;
 
-    return infinityPagination(
-      await this.usersService.findManyWithPagination({
-        filterOptions: query?.filters,
-        sortOptions: query?.sort,
-        paginationOptions: {
-          page,
-          limit,
-        },
-      }),
-      { page, limit },
-    );
+    const returnAll = limit === -1;
+
+    const data = await this.usersService.findManyWithPagination({
+      filterOptions: query?.filters,
+      sortOptions: query?.sort,
+      paginationOptions: {
+        page: returnAll ? 1 : page,
+        limit: returnAll ? -1 : limit,
+      },
+    });
+
+    return infinityPagination(data, {
+      page: returnAll ? 1 : page,
+      limit: returnAll ? data.length + 1 : limit,
+    });
   }
 
   @ApiOkResponse({

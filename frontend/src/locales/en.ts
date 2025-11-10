@@ -101,6 +101,25 @@ export default {
     assignee: 'Assignee',
     unassigned: 'Unassigned',
     emptyState: 'No items',
+    messages: {
+      loading: 'Loading tasks...',
+      loadError: 'Error loading tasks. Please try again.',
+      statusUpdating: 'Updating task status...',
+      statusFailed: 'Failed to update task status. Please try again.'
+    },
+    assignment: {
+      loading: 'Loading team members...',
+      loadError: 'Unable to load team members.',
+      inProgress: 'Updating task assignment...',
+      unassign: 'Unassign',
+      emptyList: 'No available team members.',
+      noAssignee: 'No assignee selected',
+      noEmail: 'Email unavailable',
+      errors: {
+        generic: 'Unable to update assignment. Please try again.',
+        overlap: 'This user already has a task scheduled during this period.'
+      }
+    },
     status: {
       pending: 'Pending',
       inProgress: 'In Progress',

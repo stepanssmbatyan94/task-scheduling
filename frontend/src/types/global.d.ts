@@ -1,8 +1,8 @@
 export {};
 
 declare global {
-  type SuccessResponse<T = any> = {
-    data: T;
+  type SuccessResponse<T = unknown> = {
+    data?: T;
     message?: string;
     success?: boolean;
   };

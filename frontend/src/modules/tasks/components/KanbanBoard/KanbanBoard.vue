@@ -17,8 +17,12 @@
           v-for="item in getLaneItems(lane.slug)"
           :key="getItemKey(item)"
           :item="item"
+          :assignable-users="props.assignableUsers"
+          :is-loading-assignable-users="props.isLoadingAssignableUsers"
+          :is-error-assignable-users="props.isErrorAssignableUsers"
           @drag-start="handleDragStart"
           @click="handleItemClick"
+          @assign-user="handleAssignUser"
         />
         <div v-if="getLaneItems(lane.slug).length === 0" class="kanban-empty">
           {{ t('tasks.emptyState') }}
@@ -33,6 +37,7 @@ import KanbanCard from '../KanbanCard';
 import { useKanbanDragDrop } from '../../composables/useKanbanDragDrop';
 import { getItemKey, belongsToLane } from '../utils';
 import type { KanbanBoardProps, KanbanEmits, KanbanItem } from '../types';
+import type { AssignableUser } from '../../task-type';
 import { useTranslation } from '@/composables';
 import { DRAG_DATA_KEY } from '../constants';
 
@@ -56,6 +61,10 @@ const handleItemUpdated = (item: KanbanItem, newStatus: string) => {
 
 const handleItemClick = (item: KanbanItem) => {
   emit('item-clicked', item);
+};
+
+const handleAssignUser = (item: KanbanItem, user: AssignableUser | null) => {
+  emit('assign-user', item, user);
 };
 
 // Use drag handler for drag start

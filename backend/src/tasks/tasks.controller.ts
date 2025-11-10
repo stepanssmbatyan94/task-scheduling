@@ -72,7 +72,6 @@ export class TasksController {
     const page = query?.page ?? 1;
     const limit = query?.limit ?? 20;
 
-    // If limit is -1, return all tasks without pagination
     const returnAll = limit === -1;
 
     const data = await this.tasksService.findManyWithPagination({
@@ -86,7 +85,6 @@ export class TasksController {
 
     return infinityPagination(data, {
       page: returnAll ? 1 : page,
-      // When returning all, set limit to data.length + 1 to ensure hasNextPage is false
       limit: returnAll ? data.length + 1 : limit,
     });
   }

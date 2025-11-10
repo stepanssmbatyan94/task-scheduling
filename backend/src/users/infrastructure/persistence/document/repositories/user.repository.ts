@@ -40,20 +40,24 @@ export class UsersDocumentRepository implements UserRepository {
       };
     }
 
-    const userObjects = await this.usersModel
-      .find(where)
-      .sort(
-        sortOptions?.reduce(
-          (accumulator, sort) => ({
-            ...accumulator,
-            [sort.orderBy === 'id' ? '_id' : sort.orderBy]:
-              sort.order.toUpperCase() === 'ASC' ? 1 : -1,
-          }),
-          {},
-        ),
-      )
-      .skip((paginationOptions.page - 1) * paginationOptions.limit)
-      .limit(paginationOptions.limit);
+    const query = this.usersModel.find(where).sort(
+      sortOptions?.reduce(
+        (accumulator, sort) => ({
+          ...accumulator,
+          [sort.orderBy === 'id' ? '_id' : sort.orderBy]:
+            sort.order.toUpperCase() === 'ASC' ? 1 : -1,
+        }),
+        {},
+      ),
+    );
+
+    if (paginationOptions.limit !== -1) {
+      query
+        .skip((paginationOptions.page - 1) * paginationOptions.limit)
+        .limit(paginationOptions.limit);
+    }
+
+    const userObjects = await query;
 
     return userObjects.map((userObject) => UserMapper.toDomain(userObject));
   }

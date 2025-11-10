@@ -9,15 +9,19 @@ export interface TaskStatus {
 }
 
 export interface TaskAssignedUser {
-  id: number;
-  email: string;
-  provider: string;
-  socialId: string | null;
-  firstName: string;
-  lastName: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
+  id: number | string;
+  email: string | null;
+  profileImageUrl?: string | null;
+  provider?: string | null;
+  socialId?: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  photo?: {
+    path?: string;
+  } | null;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
 }
 
 export interface Task {
@@ -53,4 +57,19 @@ export interface UpdateTaskPayload {
         id: number | string;
       }
     | null;
+}
+
+export interface AssignableUser {
+  id: number | string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  photo?: {
+    path?: string;
+  } | null;
+  role?: {
+    id: number | string;
+    name?: string | null;
+    nameEn?: string | null;
+  } | null;
 }

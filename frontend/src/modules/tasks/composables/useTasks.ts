@@ -6,7 +6,7 @@ import { computed } from 'vue';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import { fetchTasksApi, updateTaskApi } from '../task-api';
 import { useTaskStatuses } from './useTaskStatuses';
-import type { Task, TasksResponse } from '../task-type';
+import type { AssignableUser, Task, TaskAssignedUser, TasksResponse } from '../task-type';
 import type { KanbanItem, Lane } from '../components/types';
 
 const TASKS_QUERY_KEY = ['tasks'] as const;
@@ -135,11 +135,90 @@ export function useTasks() {
     return tasksData.value?.data || [];
   });
 
+  const {
+    mutateAsync: assignTaskUser,
+    isPending: isAssigningTaskUser,
+    isError: isAssigningTaskUserError,
+    error: assignTaskUserError
+  } = useMutation<
+    Task,
+    unknown,
+    {
+      id: Task['id'];
+      user: AssignableUser | null;
+    },
+    { previousData?: TasksResponse }
+  >({
+    mutationFn: ({ id, user }) =>
+      updateTaskApi(id, {
+        assignedUser: user
+          ? {
+              id: user.id
+            }
+          : null
+      }),
+    onMutate: async ({ id, user }) => {
+      await queryClient.cancelQueries({ queryKey: TASKS_QUERY_KEY });
+
+      const previousData = queryClient.getQueryData<TasksResponse>(tasksQueryKey);
+
+      if (previousData) {
+        const updatedData: TasksResponse = {
+          ...previousData,
+          data: previousData.data.map((task) =>
+            task.id === id
+              ? {
+                  ...task,
+                  assignedUser: user
+                    ? ({
+                        id: user.id,
+                        email: user.email ?? null,
+                        firstName: user.firstName ?? null,
+                        lastName: user.lastName ?? null,
+                        photo: user.photo ?? undefined,
+                        provider: task.assignedUser?.provider,
+                        socialId: task.assignedUser?.socialId,
+                        createdAt: task.assignedUser?.createdAt,
+                        updatedAt: task.assignedUser?.updatedAt,
+                        deletedAt: task.assignedUser?.deletedAt
+                      } as TaskAssignedUser)
+                    : null
+                }
+              : task
+          )
+        };
+
+        queryClient.setQueryData(tasksQueryKey, updatedData);
+      }
+
+      return { previousData };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(tasksQueryKey, context.previousData);
+      }
+    },
+    onSuccess: (updatedTask) => {
+      queryClient.setQueryData<TasksResponse | undefined>(tasksQueryKey, (previous) => {
+        if (!previous) {
+          return previous;
+        }
+
+        return {
+          ...previous,
+          data: previous.data.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+        };
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });
+    }
+  });
+
   const kanbanItems = computed<KanbanItem[]>(() => {
     return tasks.value.map(transformTaskToKanbanItem);
   });
 
-  // Create lanes from task statuses API, ordered by status.order
   const lanes = computed<Lane[]>(() => {
     return taskStatuses.value
       .map((status) => ({
@@ -153,17 +232,14 @@ export function useTasks() {
       });
   });
 
-  // Combined loading state
   const isLoading = computed(() => {
     return isLoadingStatuses.value || isLoadingTasks.value;
   });
 
-  // Combined error state
   const isError = computed(() => {
     return isErrorStatuses.value || isErrorTasks.value;
   });
 
-  // Combined error object
   const error = computed(() => {
     return errorStatuses.value || errorTasks.value;
   });
@@ -180,6 +256,10 @@ export function useTasks() {
     updateTaskStatus,
     isUpdatingTaskStatus,
     isUpdatingTaskStatusError,
-    updateTaskStatusError
+    updateTaskStatusError,
+    assignTaskUser,
+    isAssigningTaskUser,
+    isAssigningTaskUserError,
+    assignTaskUserError
   };
 }
