@@ -5,6 +5,7 @@ const envSchema = z.object({
   API_BASE_URL: z
     .string()
     .default('http://localhost:3000/api/v1'),
+  SOCKET_BASE_URL: z.string().default('http://localhost:3000'),
   MOCK_API: z.string().optional()
 });
 

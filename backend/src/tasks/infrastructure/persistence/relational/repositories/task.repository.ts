@@ -79,7 +79,6 @@ export class TasksRelationalRepository implements TaskRepository {
             .map((term) => `+${term}*`)
             .join(' ');
 
-
           applyFilter(
             'MATCH(task.title, task.description) AGAINST (:booleanSearch IN BOOLEAN MODE)',
             { booleanSearch: booleanModeSearch },

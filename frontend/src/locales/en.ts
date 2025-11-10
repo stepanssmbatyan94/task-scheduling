@@ -120,7 +120,8 @@ export default {
       searchPlaceholder: 'Search tasks',
       clearSearch: 'Clear search',
       assignedUsersPlaceholder: 'Filter by assignees',
-      clearAssignedUsers: 'Clear'
+      clearAssignedUsers: 'Clear',
+      selectAllUsers: 'Select all assignees'
     },
     messages: {
       loading: 'Loading tasks...',
@@ -129,6 +130,10 @@ export default {
       statusFailed: 'Failed to update task status. Please try again.',
       createSuccess: 'Task created successfully.',
       updateSuccess: 'Task updated successfully.'
+    },
+    notifications: {
+      assigned: 'You have been assigned to "{title}".',
+      reassigned: 'Task "{title}" has been reassigned to you.'
     },
     assignment: {
       loading: 'Loading team members...',

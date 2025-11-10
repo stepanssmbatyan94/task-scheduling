@@ -120,7 +120,8 @@ export default {
       searchPlaceholder: 'Поиск задач',
       clearSearch: 'Очистить поиск',
       assignedUsersPlaceholder: 'Фильтр по исполнителям',
-      clearAssignedUsers: 'Очистить'
+      clearAssignedUsers: 'Очистить',
+      selectAllUsers: 'Выбрать всех исполнителей'
     },
     messages: {
       loading: 'Загрузка задач...',
@@ -129,6 +130,10 @@ export default {
       statusFailed: 'Не удалось обновить статус задачи. Повторите попытку.',
       createSuccess: 'Задача успешно создана.',
       updateSuccess: 'Задача успешно обновлена.'
+    },
+    notifications: {
+      assigned: 'Вы назначены исполнителем задачи «{title}».',
+      reassigned: 'Задача «{title}» снова назначена на вас.'
     },
     assignment: {
       loading: 'Загрузка списка сотрудников...',

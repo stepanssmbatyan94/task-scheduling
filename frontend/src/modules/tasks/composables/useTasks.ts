@@ -17,7 +17,7 @@ import type {
 } from '../task-type';
 import type { KanbanItem, Lane } from '../components/types';
 
-const TASKS_QUERY_KEY = ['tasks'] as const;
+export const TASKS_BASE_QUERY_KEY = ['tasks'] as const;
 
 type TaskFilters = {
   assignedUsers?: Array<{ id: number | string }>;
@@ -73,7 +73,9 @@ export function useTasks(options: { filters?: Ref<TaskFilters> } = {}) {
 
     return params;
   });
-  const tasksQueryKey = computed(() => [...TASKS_QUERY_KEY, tasksQueryParams.value] as const);
+  const tasksQueryKey = computed(
+    () => [...TASKS_BASE_QUERY_KEY, tasksQueryParams.value] as const
+  );
   const resolveCurrentQueryKey = () => tasksQueryKey.value;
 
 
@@ -94,7 +96,7 @@ export function useTasks(options: { filters?: Ref<TaskFilters> } = {}) {
     queryKey: tasksQueryKey,
     queryFn: ({ queryKey }) => {
       const [, params] = queryKey as unknown as [
-        typeof TASKS_QUERY_KEY[number],
+        typeof TASKS_BASE_QUERY_KEY[number],
         Record<string, unknown>
       ];
       return fetchTasksApi(params);
@@ -124,7 +126,7 @@ export function useTasks(options: { filters?: Ref<TaskFilters> } = {}) {
         }
       }),
     onMutate: async ({ id, statusId, statusName }) => {
-      await queryClient.cancelQueries({ queryKey: TASKS_QUERY_KEY });
+      await queryClient.cancelQueries({ queryKey: TASKS_BASE_QUERY_KEY });
 
       const currentQueryKey = resolveCurrentQueryKey();
       const previousData = queryClient.getQueryData<TasksResponse>(currentQueryKey);
@@ -157,7 +159,7 @@ export function useTasks(options: { filters?: Ref<TaskFilters> } = {}) {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: TASKS_BASE_QUERY_KEY });
     }
   });
 
@@ -188,7 +190,7 @@ export function useTasks(options: { filters?: Ref<TaskFilters> } = {}) {
           : null
       }),
     onMutate: async ({ id, user }) => {
-      await queryClient.cancelQueries({ queryKey: TASKS_QUERY_KEY });
+      await queryClient.cancelQueries({ queryKey: TASKS_BASE_QUERY_KEY });
 
       const currentQueryKey = resolveCurrentQueryKey();
       const previousData = queryClient.getQueryData<TasksResponse>(currentQueryKey);
@@ -242,7 +244,7 @@ export function useTasks(options: { filters?: Ref<TaskFilters> } = {}) {
       });
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: TASKS_BASE_QUERY_KEY });
     }
   });
 
@@ -259,7 +261,7 @@ export function useTasks(options: { filters?: Ref<TaskFilters> } = {}) {
   >({
     mutationFn: (payload) => createTaskApi(payload),
     onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: TASKS_QUERY_KEY });
+      await queryClient.cancelQueries({ queryKey: TASKS_BASE_QUERY_KEY });
 
       const currentQueryKey = resolveCurrentQueryKey();
       const previousData = queryClient.getQueryData<TasksResponse>(currentQueryKey);
@@ -283,7 +285,7 @@ export function useTasks(options: { filters?: Ref<TaskFilters> } = {}) {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: TASKS_BASE_QUERY_KEY });
     }
   });
 
@@ -307,7 +309,7 @@ export function useTasks(options: { filters?: Ref<TaskFilters> } = {}) {
       });
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: TASKS_BASE_QUERY_KEY });
     }
   });
 

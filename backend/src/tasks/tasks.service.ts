@@ -1,6 +1,7 @@
 import {
   HttpStatus,
   Injectable,
+  Logger,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -12,10 +13,16 @@ import { IPaginationOptions } from '../utils/types/pagination-options';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskStatus } from './domain/task-status';
 import { User } from '../users/domain/user';
+import { TaskEventsGateway } from './gateways/task-events.gateway';
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly tasksRepository: TaskRepository) {}
+  private readonly logger = new Logger(TasksService.name);
+
+  constructor(
+    private readonly tasksRepository: TaskRepository,
+    private readonly taskEventsGateway: TaskEventsGateway,
+  ) {}
 
   async create(createTaskDto: CreateTaskDto): Promise<Task> {
     if (createTaskDto.startDate && createTaskDto.endDate) {
@@ -63,7 +70,7 @@ export class TasksService {
         } as TaskStatus)
       : undefined;
 
-    return this.tasksRepository.create({
+    const createdTask = await this.tasksRepository.create({
       title: createTaskDto.title,
       description: createTaskDto.description,
       startDate: createTaskDto.startDate,
@@ -71,6 +78,15 @@ export class TasksService {
       assignedUser,
       status,
     });
+
+    const assignedUserId = createdTask.assignedUser
+      ? Number(createdTask.assignedUser.id)
+      : null;
+    if (assignedUserId) {
+      this.emitAssignmentNotification(assignedUserId, createdTask, false);
+    }
+
+    return createdTask;
   }
 
   findManyWithPagination({
@@ -181,7 +197,7 @@ export class TasksService {
           } as TaskStatus)
         : undefined;
 
-    return this.tasksRepository.update(id, {
+    const updatedTask = await this.tasksRepository.update(id, {
       title: updateTaskDto.title,
       description: updateTaskDto.description,
       startDate,
@@ -189,9 +205,46 @@ export class TasksService {
       assignedUser,
       status,
     });
+
+    const previousAssigneeId = existingTask.assignedUser
+      ? Number(existingTask.assignedUser.id)
+      : null;
+    const newAssigneeId = updatedTask?.assignedUser
+      ? Number(updatedTask.assignedUser.id)
+      : null;
+
+    if (updatedTask && newAssigneeId && newAssigneeId !== previousAssigneeId) {
+      this.emitAssignmentNotification(
+        newAssigneeId,
+        updatedTask,
+        previousAssigneeId !== null,
+      );
+    }
+
+    return updatedTask;
   }
 
   async remove(id: Task['id']): Promise<void> {
     await this.tasksRepository.remove(id);
+  }
+
+  private emitAssignmentNotification(
+    userId: number,
+    task: Task,
+    isReassignment: boolean,
+  ) {
+    try {
+      this.taskEventsGateway.notifyAssignment(userId, {
+        taskId: task.id,
+        title: task.title,
+        status: task.status?.name ?? null,
+        isReassignment,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to emit assignment notification for user ${userId} and task ${task.id}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
   }
 }
