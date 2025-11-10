@@ -34,16 +34,6 @@
   flex-shrink: 0;
 }
 
-.task-board-filters__select-all {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.task-board-filters__select-all-label {
-  font-size: 0.875rem;
-}
-
 .kanban-feedback {
   margin-top: 1rem;
   display: flex;
