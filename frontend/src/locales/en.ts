@@ -1,7 +1,7 @@
 export default {
   locale: {
     en: 'English',
-    km: 'Khmer'
+    ru: 'Russian'
   },
 
   theme: {

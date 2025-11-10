@@ -28,6 +28,7 @@ export { default as PageBreadcrumb } from './shared/PageBreadcrumb.vue';
 export { default as PageContent } from './shared/PageContent.vue';
 export { default as PageContentSection } from './shared/PageContentSection.vue';
 export { default as PageTitle } from './shared/PageTitle.vue';
+export { default as LocaleSwitcher } from './shared/LocaleSwitcher.vue';
 export { default as UserAvatar } from './shared/UserAvatar.vue';
 
 // vee-validate

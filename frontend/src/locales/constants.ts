@@ -6,10 +6,10 @@ interface LanguageType {
 
 export enum Locales {
   EN = 'en',
-  KM = 'km'
+  RU = 'ru'
 }
 
-export const LOCALE_KEYS = [Locales.EN, Locales.KM];
+export const LOCALE_KEYS = [Locales.EN, Locales.RU];
 
 export const LANGUAGES: LanguageType[] = [
   {
@@ -17,7 +17,7 @@ export const LANGUAGES: LanguageType[] = [
     label: 'English'
   },
   {
-    value: Locales.KM,
-    label: 'ភាសាខ្មែរ'
+    value: Locales.RU,
+    label: 'Русский'
   }
 ];

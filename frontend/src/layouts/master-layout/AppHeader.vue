@@ -15,8 +15,8 @@
         <ChevronsLeft :size="24" />
       </div> -->
     </div>
-    <div class="flex justify-end items-center px-5 h-16">
-      <!-- <LocaleSwitcher /> -->
+    <div class="flex justify-end items-center px-5 h-16 gap-4">
+      <LocaleSwitcher />
       <AppHeaderUserNav />
     </div>
   </div>
@@ -25,6 +25,7 @@
 <script lang="ts" setup>
 // import logo from '@/assets/images/logo.svg';
 import AppHeaderUserNav from './AppHeaderUserNav.vue';
+import { LocaleSwitcher } from '@/components';
 </script>
 
 <style scoped></style>

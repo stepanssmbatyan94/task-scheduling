@@ -102,7 +102,7 @@ The boilerplate of Vue v3, Typescript, Vite, Vue Router, Pinia, Axios, Tailwind 
 │   ├── locales
 │   │   ├── en.ts
 │   │   ├── index.ts
-│   │   └── km.ts
+│   │   └── ru.ts
 │   ├── main.ts
 │   ├── modules
 │   │   ├── auth
