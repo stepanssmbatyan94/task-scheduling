@@ -282,7 +282,10 @@ watch(
       return;
     }
 
-    setValues(initialValues(), false);
+    setValues(initialValues(), {
+      shouldValidate: false,
+      force: true
+    });
   }
 );
 </script>

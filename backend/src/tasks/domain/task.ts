@@ -1,20 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../users/domain/user';
 import { TaskStatus } from './task-status';
-import databaseConfig from '../../database/config/database.config';
-import { DatabaseConfig } from '../../database/config/database-config.type';
-
-// <database-block>
-const idType = (databaseConfig() as DatabaseConfig).isDocumentDatabase
-  ? String
-  : Number;
-// </database-block>
 
 export class Task {
   @ApiProperty({
-    type: idType,
+    type: Number,
   })
-  id: number | string;
+  id: number;
 
   @ApiProperty({
     type: String,

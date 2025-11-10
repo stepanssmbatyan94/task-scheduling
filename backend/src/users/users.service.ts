@@ -89,8 +89,8 @@ export class UsersService {
       }
 
       role = {
-        id: createUserDto.role.id,
-      };
+        id: Number(createUserDto.role.id),
+      } as Role;
     }
 
     let status: Status | undefined = undefined;
@@ -109,8 +109,8 @@ export class UsersService {
       }
 
       status = {
-        id: createUserDto.status.id,
-      };
+        id: Number(createUserDto.status.id),
+      } as Status;
     }
 
     return this.usersRepository.create({
@@ -243,8 +243,8 @@ export class UsersService {
       }
 
       role = {
-        id: updateUserDto.role.id,
-      };
+        id: Number(updateUserDto.role.id),
+      } as Role;
     }
 
     let status: Status | undefined = undefined;
@@ -263,8 +263,8 @@ export class UsersService {
       }
 
       status = {
-        id: updateUserDto.status.id,
-      };
+        id: Number(updateUserDto.status.id),
+      } as Status;
     }
 
     return this.usersRepository.update(id, {
