@@ -54,8 +54,10 @@
       </Card>
     </PageContent>
 
-    <TaskCreateModal
+    <TaskFormModal
       :visible="showCreateModal"
+      mode="create"
+      :task="null"
       :statuses="taskStatuses"
       :assignable-users="assignableUsers"
       :assignable-users-loading="assignmentLoading"
@@ -63,12 +65,33 @@
       @close="closeCreateModal"
       @submit="handleCreateTask"
     />
+
+    <TaskViewModal
+      :visible="isViewModalOpen"
+      :task="selectedTask"
+      :statuses="taskStatuses"
+      :assignable-users="assignableUsers"
+      @close="handleCloseView"
+      @edit="openEditModal"
+    />
+
+    <TaskFormModal
+      :visible="isEditModalOpen"
+      mode="edit"
+      :task="selectedTask"
+      :statuses="taskStatuses"
+      :assignable-users="assignableUsers"
+      :assignable-users-loading="assignmentLoading"
+      :is-submitting="isUpdatingTask"
+      @close="handleCloseEdit"
+      @submit="handleUpdateTask"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { KanbanBoard, TaskCreateModal } from '../../components';
+import { KanbanBoard, TaskFormModal, TaskViewModal } from '../../components';
 import { useTasks } from '../../composables/useTasks';
 import { useAssignableUsers } from '../../composables/useAssignableUsers';
 
@@ -82,13 +105,14 @@ import {
 import { useTranslation } from '@/composables';
 import type { BreadcrumbItemProps } from '@/types';
 import type { KanbanItem } from '../../components/types';
-import type { AssignableUser, CreateTaskPayload } from '../../task-type';
+import type { AssignableUser, CreateTaskPayload, Task, UpdateTaskPayload } from '../../task-type';
 import { toast } from 'vue3-toastify';
 
 const { t } = useTranslation();
 
 // Fetch tasks from API
 const {
+  tasks,
   kanbanItems,
   lanes,
   taskStatuses,
@@ -100,7 +124,10 @@ const {
   assignTaskUser,
   isAssigningTaskUser,
   createTask,
-  isCreatingTask
+  isCreatingTask,
+  updateTask,
+  isUpdatingTask,
+  updateTaskError
 } = useTasks();
 
 const {
@@ -115,6 +142,9 @@ const assignmentLoading = computed(
 );
 
 const showCreateModal = ref(false);
+const isViewModalOpen = ref(false);
+const isEditModalOpen = ref(false);
+const selectedTask = ref<Task | null>(null);
 
 // Breadcrumb
 const breadcrumbItems = ref<BreadcrumbItemProps[]>([
@@ -192,8 +222,10 @@ const handleAssignUser = async (item: KanbanItem, user: AssignableUser | null) =
 };
 
 const handleItemClicked = (item: KanbanItem) => {
-  console.log('Item clicked:', item);
-  // TODO: Open task details modal
+  const task = tasks.value.find((existingTask) => existingTask.id === item.id);
+  selectedTask.value = task ?? null;
+  isViewModalOpen.value = Boolean(task);
+  isEditModalOpen.value = false;
 };
 
 const openCreateModal = () => {
@@ -211,6 +243,47 @@ const handleCreateTask = async (payload: CreateTaskPayload) => {
     closeCreateModal();
   } catch (error) {
     console.error('Failed to create task', error);
+  }
+};
+
+const handleCloseView = () => {
+  isViewModalOpen.value = false;
+  if (!isEditModalOpen.value) {
+    selectedTask.value = null;
+  }
+};
+
+const openEditModal = () => {
+  if (!selectedTask.value) {
+    return;
+  }
+  isViewModalOpen.value = false;
+  isEditModalOpen.value = true;
+};
+
+const handleCloseEdit = () => {
+  isEditModalOpen.value = false;
+  selectedTask.value = null;
+};
+
+const handleUpdateTask = async (payload: CreateTaskPayload) => {
+  if (!selectedTask.value) {
+    return;
+  }
+
+  const updatePayload: UpdateTaskPayload = {
+    ...payload
+  };
+
+  try {
+    await updateTask({
+      id: selectedTask.value.id,
+      values: updatePayload
+    });
+    toast.success(t('tasks.messages.updateSuccess'));
+    handleCloseEdit();
+  } catch (error) {
+    console.error('Failed to update task', error || updateTaskError.value);
   }
 };
 </script>

@@ -1,6 +1,7 @@
 export { default as KanbanBoard } from './KanbanBoard';
 export { default as KanbanCard } from './KanbanCard';
-export { default as TaskCreateModal } from './TaskCreateModal';
+export { default as TaskFormModal } from './TaskFormModal';
+export { default as TaskViewModal } from './TaskViewModal';
 
 export * from './types';
 export * from './constants';

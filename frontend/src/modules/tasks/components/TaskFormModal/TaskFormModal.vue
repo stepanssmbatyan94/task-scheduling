@@ -2,11 +2,16 @@
   <Dialog
     :visible="visible"
     modal
-    :header="t('tasks.create')"
     :style="{ width: '520px' }"
     @update:visible="onVisibilityChange"
   >
-    <form class="task-create-form" @submit.prevent="onSubmit">
+    <template #header>
+      <div class="task-form-modal__header">
+        <span class="task-form-modal__title">{{ headerTitle }}</span>
+      </div>
+    </template>
+
+    <form id="task-form-modal-form" class="task-form-modal__content" @submit.prevent="onSubmit">
       <InputField
         name="title"
         :label="t('tasks.fields.title')"
@@ -21,7 +26,7 @@
         :rows="4"
       />
 
-      <div class="task-create-form__row">
+      <div class="task-form-modal__row">
         <InputField
           name="startDate"
           type="date"
@@ -57,16 +62,16 @@
         required
       />
 
-      <div class="task-create-form__actions">
+      <div class="task-form-modal__actions">
         <Button
           type="button"
           severity="secondary"
           :label="t('cancel')"
-          @click="handleCancel"
+          @click="emitClose"
         />
         <Button
           type="submit"
-          :label="isSubmitting ? t('loading') : t('tasks.create')"
+          :label="submitLabel"
           :disabled="isSubmitting"
         />
       </div>
@@ -87,21 +92,24 @@ import {
   TextAreaField
 } from '@/components';
 import { useTranslation } from '@/composables';
-import type { AssignableUser, CreateTaskPayload, TaskStatus } from '../../task-type';
+import type { AssignableUser, CreateTaskPayload, Task, TaskStatus } from '../../task-type';
 import {
-  buildTaskCreateSchema,
-  type TaskCreateFormValues
+  buildTaskFormSchema,
+  type TaskFormValues
 } from './schema';
 
 const props = withDefaults(
   defineProps<{
     visible: boolean;
+    mode: 'create' | 'edit';
+    task: Task | null;
     statuses: TaskStatus[];
     assignableUsers: AssignableUser[];
     assignableUsersLoading: boolean;
     isSubmitting: boolean;
   }>(),
   {
+    task: null,
     statuses: () => [],
     assignableUsers: () => [],
     assignableUsersLoading: false,
@@ -116,22 +124,56 @@ const emit = defineEmits<{
 
 const { t } = useTranslation();
 
-const schema = buildTaskCreateSchema(t);
+const schema = buildTaskFormSchema(t);
 
-const initialValues = (): TaskCreateFormValues => {
-  const todayIso = new Date().toISOString().split('T')[0];
+const toInputDateString = (value: string | null | undefined): string => {
+  if (!value) {
+    return '';
+  }
+
+  if (value.includes('T')) {
+    return value.split('T')[0];
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().split('T')[0];
+};
+
+const todayInputDate = () => {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return local.toISOString().split('T')[0];
+};
+
+const initialValues = (): TaskFormValues => {
+  if (!props.task) {
+    const today = todayInputDate();
+    return {
+      title: '',
+      description: '',
+      startDate: today,
+      endDate: today,
+      assignedUserId: '',
+      statusId: ''
+    };
+  }
 
   return {
-    title: '',
-    description: '',
-    startDate: todayIso,
-    endDate: todayIso,
-    assignedUserId: '',
-    statusId: ''
+    title: props.task.title ?? '',
+    description: props.task.description ?? '',
+    startDate: toInputDateString(props.task.startDate),
+    endDate: toInputDateString(props.task.endDate),
+    assignedUserId: props.task.assignedUser ? String(props.task.assignedUser.id) : '',
+    statusId: props.task.status ? String(props.task.status.id) : ''
   };
 };
 
-const { handleSubmit, resetForm } = useForm<TaskCreateFormValues>({
+const { handleSubmit, resetForm, setValues } = useForm<TaskFormValues>({
   validationSchema: toTypedSchema(schema),
   initialValues: initialValues()
 });
@@ -148,6 +190,20 @@ const assignableUserOptions = computed(() =>
     label: formatUserDisplayName(user),
     value: String(user.id)
   }))
+);
+
+const headerTitle = computed(() =>
+  props.mode === 'create'
+    ? t('tasks.create')
+    : props.task?.title || t('tasks.edit')
+);
+
+const submitLabel = computed(() =>
+  props.isSubmitting
+    ? t('loading')
+    : props.mode === 'create'
+      ? t('tasks.create')
+      : t('save')
 );
 
 const formatStatusName = (statusName: string): string => {
@@ -173,35 +229,36 @@ const formatUserDisplayName = (user: AssignableUser): string => {
   return t('tasks.assignment.noAssignee');
 };
 
-const normalizePayload = (values: TaskCreateFormValues): CreateTaskPayload => {
+const parseIdentifier = (value: string) =>
+  Number.isNaN(Number(value)) ? value : Number(value);
+
+const normalizePayload = (formValues: TaskFormValues): CreateTaskPayload => {
   return {
-    title: values.title.trim(),
-    description: values.description?.trim() || undefined,
-    startDate: values.startDate,
-    endDate: values.endDate,
+    title: formValues.title.trim(),
+    description: formValues.description?.trim() || undefined,
+    startDate: formValues.startDate,
+    endDate: formValues.endDate,
     assignedUser: {
-      id: Number.isNaN(Number(values.assignedUserId))
-        ? values.assignedUserId
-        : Number(values.assignedUserId)
+      id: parseIdentifier(formValues.assignedUserId)
     },
     status: {
-      id: Number.isNaN(Number(values.statusId)) ? values.statusId : Number(values.statusId)
+      id: parseIdentifier(formValues.statusId)
     }
   };
 };
 
-const onSubmit = handleSubmit((values) => {
-  emit('submit', normalizePayload(values));
+const onSubmit = handleSubmit((formValues) => {
+  emit('submit', normalizePayload(formValues));
 });
-
-const handleCancel = () => {
-  emit('close');
-};
 
 const onVisibilityChange = (isVisible: boolean) => {
   if (!isVisible) {
-    emit('close');
+    emitClose();
   }
+};
+
+const emitClose = () => {
+  emit('close');
 };
 
 watch(
@@ -214,6 +271,21 @@ watch(
     }
   }
 );
+
+watch(
+  () => props.task,
+  (task) => {
+    if (!task) {
+      resetForm({
+        values: initialValues()
+      });
+      return;
+    }
+
+    setValues(initialValues(), false);
+  }
+);
 </script>
 
-<style src="./TaskCreateModal.styles.css" scoped></style>
+<style src="./TaskFormModal.styles.css" scoped></style>
+

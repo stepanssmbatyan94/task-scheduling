@@ -55,6 +55,7 @@ export default {
       email: 'Enter your email address',
       password: 'Enter your password'
     },
+    details: 'Task Details',
     validation: {
       email: 'Please enter a valid email address.',
       password: 'Please enter a password.'
@@ -120,7 +121,8 @@ export default {
       loadError: 'Error loading tasks. Please try again.',
       statusUpdating: 'Updating task status...',
       statusFailed: 'Failed to update task status. Please try again.',
-      createSuccess: 'Task created successfully.'
+      createSuccess: 'Task created successfully.',
+      updateSuccess: 'Task updated successfully.'
     },
     assignment: {
       loading: 'Loading team members...',

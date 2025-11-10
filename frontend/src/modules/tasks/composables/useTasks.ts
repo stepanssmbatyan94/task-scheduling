@@ -11,7 +11,8 @@ import type {
   CreateTaskPayload,
   Task,
   TaskAssignedUser,
-  TasksResponse
+  TasksResponse,
+  UpdateTaskPayload
 } from '../task-type';
 import type { KanbanItem, Lane } from '../components/types';
 
@@ -261,6 +262,30 @@ export function useTasks() {
     }
   });
 
+  const {
+    mutateAsync: updateTask,
+    isPending: isUpdatingTask,
+    isError: isUpdatingTaskError,
+    error: updateTaskError
+  } = useMutation<Task, unknown, { id: Task['id']; values: UpdateTaskPayload }>({
+    mutationFn: ({ id, values }) => updateTaskApi(id, values),
+    onSuccess: (updatedTask) => {
+      queryClient.setQueryData<TasksResponse | undefined>(tasksQueryKey, (previous) => {
+        if (!previous) {
+          return previous;
+        }
+
+        return {
+          ...previous,
+          data: previous.data.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+        };
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });
+    }
+  });
+
   const kanbanItems = computed<KanbanItem[]>(() => {
     return tasks.value.map(transformTaskToKanbanItem);
   });
@@ -310,6 +335,10 @@ export function useTasks() {
     assignTaskUser,
     isAssigningTaskUser,
     isAssigningTaskUserError,
-    assignTaskUserError
+    assignTaskUserError,
+    updateTask,
+    isUpdatingTask,
+    isUpdatingTaskError,
+    updateTaskError
   };
 }

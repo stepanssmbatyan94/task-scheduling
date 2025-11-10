@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export type TaskCreateFormValues = {
+export type TaskFormValues = {
   title: string;
   description: string | null;
   startDate: string;
@@ -11,7 +11,7 @@ export type TaskCreateFormValues = {
 
 type TranslateFn = (key: string, params?: Record<string, unknown>) => string;
 
-export const buildTaskCreateSchema = (t: TranslateFn) =>
+export const buildTaskFormSchema = (t: TranslateFn) =>
   z
     .object({
       title: z
