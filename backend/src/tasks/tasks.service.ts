@@ -128,11 +128,17 @@ export class TasksService {
     }
 
     // Check for overlapping tasks if user is being assigned or reassigned and dates are provided
-    const assignedUserId = updateTaskDto.assignedUser?.id
-      ? Number(updateTaskDto.assignedUser.id)
-      : existingTask.assignedUser
+    let assignedUserId: number | null;
+
+    if (updateTaskDto.assignedUser === null) {
+      assignedUserId = null;
+    } else if (updateTaskDto.assignedUser?.id) {
+      assignedUserId = Number(updateTaskDto.assignedUser.id);
+    } else {
+      assignedUserId = existingTask.assignedUser
         ? Number(existingTask.assignedUser.id)
         : null;
+    }
 
     if (assignedUserId && startDate && endDate) {
       const overlappingTasks =
