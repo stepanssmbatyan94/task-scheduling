@@ -18,6 +18,7 @@
             v-if="item.assignedUser"
             :src="userAvatarSrc"
             :label="userInitials"
+            :style="avatarStyle"
             shape="circle"
             class="kanban-card-avatar"
           />
@@ -188,6 +189,76 @@ const sortedAssignableUsers = computed<AssignableUser[]>(() => {
   return [...props.assignableUsers].sort((a, b) =>
     collator.compare(formatAssignableUserName(a), formatAssignableUserName(b))
   );
+});
+
+const AVATAR_COLOR_PALETTE = [
+  '#FDE68A',
+  '#FBCFE8',
+  '#BFDBFE',
+  '#BBF7D0',
+  '#FECACA',
+  '#DDD6FE',
+  '#FCD34D',
+  '#C7D2FE',
+  '#A7F3D0',
+  '#F9A8D4'
+] as const;
+
+const getSeedFromValue = (value: unknown): number | undefined => {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  if (typeof value === 'number') {
+    return value;
+  }
+
+  const text = String(value);
+  let hash = 0;
+
+  for (let index = 0; index < text.length; index += 1) {
+    hash = (hash << 5) - hash + text.charCodeAt(index);
+    hash |= 0;
+  }
+
+  return hash;
+};
+
+const avatarBackgroundColor = computed(() => {
+  if (userAvatarSrc.value) {
+    return undefined;
+  }
+
+  const candidateIds = [
+    props.item.assignedUser?.id,
+    props.item.assignedUser?.email,
+    props.item.assignedUser?.firstName,
+    props.item.id
+  ];
+
+  for (const candidate of candidateIds) {
+    const seed = getSeedFromValue(candidate);
+
+    if (seed !== undefined) {
+      const index = Math.abs(seed) % AVATAR_COLOR_PALETTE.length;
+      return AVATAR_COLOR_PALETTE[index];
+    }
+  }
+
+  return AVATAR_COLOR_PALETTE[0];
+});
+
+const avatarStyle = computed(() => {
+  const backgroundColor = avatarBackgroundColor.value;
+
+  if (!backgroundColor) {
+    return undefined;
+  }
+
+  return {
+    backgroundColor,
+    color: '#111827'
+  };
 });
 
 const toggleAssignOverlay = (event: MouseEvent) => {
