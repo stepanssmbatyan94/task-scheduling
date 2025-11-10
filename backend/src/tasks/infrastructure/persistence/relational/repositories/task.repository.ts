@@ -8,20 +8,33 @@ import { Task } from '../../../../domain/task';
 import { TaskRepository } from '../../task.repository';
 import { TaskMapper } from '../mappers/task.mapper';
 import { IPaginationOptions } from '../../../../../utils/types/pagination-options';
+import { UserAvailabilityEntity } from '../entities/user-availability.entity';
+import { UserEntity } from '../../../../../users/infrastructure/persistence/relational/entities/user.entity';
 
 @Injectable()
 export class TasksRelationalRepository implements TaskRepository {
   constructor(
     @InjectRepository(TaskEntity)
     private readonly tasksRepository: Repository<TaskEntity>,
+    @InjectRepository(UserAvailabilityEntity)
+    private readonly availabilityRepository: Repository<UserAvailabilityEntity>,
   ) {}
 
   async create(data: Task): Promise<Task> {
     const persistenceModel = TaskMapper.toPersistence(data);
-    const newEntity = await this.tasksRepository.save(
+    const taskEntity = await this.tasksRepository.save(
       this.tasksRepository.create(persistenceModel),
     );
-    return TaskMapper.toDomain(newEntity);
+
+    await this.syncAvailability(taskEntity.id, data);
+
+    const reloaded = await this.findById(taskEntity.id);
+
+    if (!reloaded) {
+      throw new Error('Task not found after creation');
+    }
+
+    return reloaded;
   }
 
   async findManyWithPagination({
@@ -35,7 +48,8 @@ export class TasksRelationalRepository implements TaskRepository {
   }): Promise<Task[]> {
     const queryBuilder = this.tasksRepository
       .createQueryBuilder('task')
-      .leftJoinAndSelect('task.assignedUser', 'assignedUser')
+      .leftJoinAndSelect('task.availability', 'availability')
+      .leftJoinAndSelect('availability.user', 'assignedUser')
       .leftJoinAndSelect('task.status', 'status');
 
     if (filterOptions?.search) {
@@ -47,11 +61,11 @@ export class TasksRelationalRepository implements TaskRepository {
 
     if (filterOptions?.assignedUser?.id) {
       if (filterOptions?.search) {
-        queryBuilder.andWhere('task.assignedUserId = :userId', {
+        queryBuilder.andWhere('availability.userId = :userId', {
           userId: Number(filterOptions.assignedUser.id),
         });
       } else {
-        queryBuilder.where('task.assignedUserId = :userId', {
+        queryBuilder.where('availability.userId = :userId', {
           userId: Number(filterOptions.assignedUser.id),
         });
       }
@@ -71,10 +85,25 @@ export class TasksRelationalRepository implements TaskRepository {
 
     if (sortOptions?.length) {
       sortOptions.forEach((sort) => {
-        queryBuilder.addOrderBy(
-          `task.${sort.orderBy}`,
-          sort.order.toUpperCase() as 'ASC' | 'DESC',
-        );
+        const order = sort.order.toUpperCase() as 'ASC' | 'DESC';
+
+        if (sort.orderBy === 'startDate') {
+          queryBuilder.addOrderBy('availability.startDate', order);
+          return;
+        }
+
+        if (sort.orderBy === 'endDate') {
+          queryBuilder.addOrderBy('availability.endDate', order);
+          return;
+        }
+
+        if (sort.orderBy === 'assignedUser') {
+          queryBuilder.addOrderBy('assignedUser.lastName', order);
+          queryBuilder.addOrderBy('assignedUser.firstName', order);
+          return;
+        }
+
+        queryBuilder.addOrderBy(`task.${sort.orderBy}`, order);
       });
     } else {
       queryBuilder.orderBy('task.createdAt', 'DESC');
@@ -95,7 +124,7 @@ export class TasksRelationalRepository implements TaskRepository {
   async findById(id: Task['id']): Promise<NullableType<Task>> {
     const entity = await this.tasksRepository.findOne({
       where: { id: Number(id) },
-      relations: ['assignedUser', 'status'],
+      relations: ['availability', 'availability.user', 'status'],
     });
 
     return entity ? TaskMapper.toDomain(entity) : null;
@@ -109,15 +138,19 @@ export class TasksRelationalRepository implements TaskRepository {
   ): Promise<Task[]> {
     const queryBuilder = this.tasksRepository
       .createQueryBuilder('task')
-      .leftJoinAndSelect('task.assignedUser', 'assignedUser')
+      .innerJoinAndSelect('task.availability', 'availability')
+      .leftJoinAndSelect('availability.user', 'assignedUser')
       .leftJoinAndSelect('task.status', 'status')
-      .where('task.assignedUserId = :userId', { userId })
-      .andWhere('task.startDate IS NOT NULL')
-      .andWhere('task.endDate IS NOT NULL')
-      .andWhere('(task.startDate <= :endDate AND task.endDate >= :startDate)', {
-        startDate,
-        endDate,
-      });
+      .where('availability.userId = :userId', { userId })
+      .andWhere('availability.startDate IS NOT NULL')
+      .andWhere('availability.endDate IS NOT NULL')
+      .andWhere(
+        '(availability.startDate <= :endDate AND availability.endDate >= :startDate)',
+        {
+          startDate,
+          endDate,
+        },
+      );
 
     if (excludeTaskId) {
       queryBuilder.andWhere('task.id != :excludeTaskId', {
@@ -133,26 +166,86 @@ export class TasksRelationalRepository implements TaskRepository {
   async update(id: Task['id'], payload: Partial<Task>): Promise<Task> {
     const entity = await this.tasksRepository.findOne({
       where: { id: Number(id) },
-      relations: ['assignedUser', 'status'],
+      relations: ['availability', 'availability.user', 'status'],
     });
 
     if (!entity) {
       throw new Error('Task not found');
     }
 
+    const toSave = TaskMapper.toPersistence({
+      ...TaskMapper.toDomain(entity),
+      ...payload,
+    });
+
     const updatedEntity = await this.tasksRepository.save(
-      this.tasksRepository.create(
-        TaskMapper.toPersistence({
-          ...TaskMapper.toDomain(entity),
-          ...payload,
-        }),
-      ),
+      this.tasksRepository.create({
+        ...entity,
+        ...toSave,
+      }),
     );
 
-    return TaskMapper.toDomain(updatedEntity);
+    await this.syncAvailability(updatedEntity.id, {
+      ...TaskMapper.toDomain(entity),
+      ...payload,
+    });
+
+    const reloaded = await this.findById(updatedEntity.id);
+
+    if (!reloaded) {
+      throw new Error('Task not found after update');
+    }
+
+    return reloaded;
   }
 
   async remove(id: Task['id']): Promise<void> {
     await this.tasksRepository.softDelete(id);
+  }
+
+  private async syncAvailability(taskId: number, payload: Partial<Task>) {
+    const existingAvailability = await this.availabilityRepository.findOne({
+      where: { taskId },
+      relations: ['user'],
+    });
+
+    const assignedUserId =
+      payload.assignedUser === undefined
+        ? (existingAvailability?.userId ?? null)
+        : payload.assignedUser
+          ? Number(payload.assignedUser.id)
+          : null;
+
+    const startDate =
+      payload.startDate === undefined
+        ? (existingAvailability?.startDate ?? null)
+        : (payload.startDate ?? null);
+
+    const endDate =
+      payload.endDate === undefined
+        ? (existingAvailability?.endDate ?? null)
+        : (payload.endDate ?? null);
+
+    if (!assignedUserId && !startDate && !endDate) {
+      if (existingAvailability) {
+        await this.availabilityRepository.remove(existingAvailability);
+      }
+      return;
+    }
+
+    const availabilityEntity =
+      existingAvailability ??
+      this.availabilityRepository.create({
+        taskId,
+      });
+
+    availabilityEntity.userId = assignedUserId ?? null;
+    availabilityEntity.user = assignedUserId
+      ? ({ id: assignedUserId } as UserEntity)
+      : null;
+    availabilityEntity.startDate = startDate ?? null;
+    availabilityEntity.endDate = endDate ?? null;
+
+    await this.availabilityRepository.save(availabilityEntity);
   }
 }

@@ -4,10 +4,16 @@ import { TaskSeedService } from './task-seed.service';
 import { TaskEntity } from '../../../../tasks/infrastructure/persistence/relational/entities/task.entity';
 import { TaskStatusEntity } from '../../../../tasks/infrastructure/persistence/relational/entities/task-status.entity';
 import { UserEntity } from '../../../../users/infrastructure/persistence/relational/entities/user.entity';
+import { UserAvailabilityEntity } from '../../../../tasks/infrastructure/persistence/relational/entities/user-availability.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TaskEntity, TaskStatusEntity, UserEntity]),
+    TypeOrmModule.forFeature([
+      TaskEntity,
+      TaskStatusEntity,
+      UserEntity,
+      UserAvailabilityEntity,
+    ]),
   ],
   providers: [TaskSeedService],
   exports: [TaskSeedService],

@@ -10,8 +10,9 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { EntityRelationalHelper } from '../../../../../utils/relational-entity-helper';
-import { UserEntity } from '../../../../../users/infrastructure/persistence/relational/entities/user.entity';
 import { TaskStatusEntity } from './task-status.entity';
+import { UserAvailabilityEntity } from './user-availability.entity';
+import { OneToOne } from 'typeorm';
 
 @Entity({
   name: 'task',
@@ -27,23 +28,6 @@ export class TaskEntity extends EntityRelationalHelper {
   @Column({ type: String, nullable: true })
   description?: string | null;
 
-  @Index()
-  @Column({ type: 'timestamp', nullable: true })
-  startDate?: Date | null;
-
-  @Index()
-  @Column({ type: 'timestamp', nullable: true })
-  endDate?: Date | null;
-
-  @ManyToOne(() => UserEntity, {
-    eager: true,
-  })
-  @JoinColumn({ name: 'assignedUserId' })
-  assignedUser?: UserEntity | null;
-
-  @Column({ nullable: true })
-  assignedUserId?: number | null;
-
   @ManyToOne(() => TaskStatusEntity, {
     eager: true,
   })
@@ -52,6 +36,11 @@ export class TaskEntity extends EntityRelationalHelper {
 
   @Column({ nullable: true })
   statusId?: number | null;
+
+  @OneToOne(() => UserAvailabilityEntity, (availability) => availability.task, {
+    eager: true,
+  })
+  availability?: UserAvailabilityEntity | null;
 
   @CreateDateColumn()
   createdAt: Date;

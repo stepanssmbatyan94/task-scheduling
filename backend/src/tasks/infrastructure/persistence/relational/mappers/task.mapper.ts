@@ -1,4 +1,3 @@
-import { UserEntity } from '../../../../../users/infrastructure/persistence/relational/entities/user.entity';
 import { UserMapper } from '../../../../../users/infrastructure/persistence/relational/mappers/user.mapper';
 import { TaskStatusEntity } from '../entities/task-status.entity';
 import { Task } from '../../../../domain/task';
@@ -10,10 +9,15 @@ export class TaskMapper {
     domainEntity.id = raw.id;
     domainEntity.title = raw.title;
     domainEntity.description = raw.description;
-    domainEntity.startDate = raw.startDate;
-    domainEntity.endDate = raw.endDate;
-    if (raw.assignedUser) {
-      domainEntity.assignedUser = UserMapper.toDomain(raw.assignedUser);
+    const availability = raw.availability;
+    domainEntity.startDate = availability
+      ? (availability.startDate ?? null)
+      : null;
+    domainEntity.endDate = availability ? (availability.endDate ?? null) : null;
+    if (availability) {
+      domainEntity.assignedUser = availability.user
+        ? UserMapper.toDomain(availability.user)
+        : null;
     }
     if (raw.status) {
       domainEntity.status = {
@@ -29,15 +33,6 @@ export class TaskMapper {
   }
 
   static toPersistence(domainEntity: Task): TaskEntity {
-    let assignedUser: UserEntity | undefined | null = undefined;
-
-    if (domainEntity.assignedUser) {
-      assignedUser = new UserEntity();
-      assignedUser.id = Number(domainEntity.assignedUser.id);
-    } else if (domainEntity.assignedUser === null) {
-      assignedUser = null;
-    }
-
     let status: TaskStatusEntity | undefined = undefined;
 
     if (domainEntity.status) {
@@ -51,10 +46,6 @@ export class TaskMapper {
     }
     persistenceEntity.title = domainEntity.title;
     persistenceEntity.description = domainEntity.description;
-    persistenceEntity.startDate = domainEntity.startDate;
-    persistenceEntity.endDate = domainEntity.endDate;
-    persistenceEntity.assignedUser = assignedUser;
-    persistenceEntity.assignedUserId = assignedUser ? assignedUser.id : null;
     persistenceEntity.status = status;
     persistenceEntity.statusId = status ? status.id : null;
     persistenceEntity.createdAt = domainEntity.createdAt;

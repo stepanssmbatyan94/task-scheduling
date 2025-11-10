@@ -15,5 +15,4 @@ import { FilesModule } from '../files/files.module';
   providers: [UsersService],
   exports: [UsersService, RelationalUserPersistenceModule],
 })
-
 export class UsersModule {}

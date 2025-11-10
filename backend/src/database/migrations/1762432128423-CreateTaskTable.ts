@@ -14,33 +14,9 @@ export class CreateTaskTable1762432128423 implements MigrationInterface {
     columnNames: ['title'],
   });
 
-  private readonly taskStartDateIndex = new TableIndex({
-    name: 'IDX_task_start_date',
-    columnNames: ['startDate'],
-  });
-
-  private readonly taskEndDateIndex = new TableIndex({
-    name: 'IDX_task_end_date',
-    columnNames: ['endDate'],
-  });
-
   private readonly taskStatusIndex = new TableIndex({
     name: 'IDX_task_status_id',
     columnNames: ['statusId'],
-  });
-
-  private readonly taskAssignedDateRangeIndex = new TableIndex({
-    name: 'IDX_task_assigned_range',
-    columnNames: ['assignedUserId', 'startDate', 'endDate'],
-  });
-
-  private readonly taskAssignedUserForeignKey = new TableForeignKey({
-    name: 'FK_task_assigned_user',
-    columnNames: ['assignedUserId'],
-    referencedTableName: 'user',
-    referencedColumnNames: ['id'],
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
   });
 
   private readonly taskStatusForeignKey = new TableForeignKey({
@@ -75,21 +51,6 @@ export class CreateTaskTable1762432128423 implements MigrationInterface {
             isNullable: true,
           },
           {
-            name: 'startDate',
-            type: 'timestamp',
-            isNullable: true,
-          },
-          {
-            name: 'endDate',
-            type: 'timestamp',
-            isNullable: true,
-          },
-          {
-            name: 'assignedUserId',
-            type: 'int',
-            isNullable: true,
-          },
-          {
             name: 'statusId',
             type: 'int',
             isNullable: true,
@@ -116,29 +77,17 @@ export class CreateTaskTable1762432128423 implements MigrationInterface {
 
     await queryRunner.createIndices('task', [
       this.taskTitleIndex,
-      this.taskStartDateIndex,
-      this.taskEndDateIndex,
       this.taskStatusIndex,
-      this.taskAssignedDateRangeIndex,
     ]);
 
-    await queryRunner.createForeignKeys('task', [
-      this.taskAssignedUserForeignKey,
-      this.taskStatusForeignKey,
-    ]);
+    await queryRunner.createForeignKeys('task', [this.taskStatusForeignKey]);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKeys('task', [
-      this.taskStatusForeignKey,
-      this.taskAssignedUserForeignKey,
-    ]);
+    await queryRunner.dropForeignKeys('task', [this.taskStatusForeignKey]);
 
     await queryRunner.dropIndices('task', [
-      this.taskAssignedDateRangeIndex,
       this.taskStatusIndex,
-      this.taskEndDateIndex,
-      this.taskStartDateIndex,
       this.taskTitleIndex,
     ]);
 

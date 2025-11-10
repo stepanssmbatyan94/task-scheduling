@@ -6,9 +6,16 @@ import { TaskStatusRelationalRepository } from './repositories/task-status.repos
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TaskEntity } from './entities/task.entity';
 import { TaskStatusEntity } from './entities/task-status.entity';
+import { UserAvailabilityEntity } from './entities/user-availability.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TaskEntity, TaskStatusEntity])],
+  imports: [
+    TypeOrmModule.forFeature([
+      TaskEntity,
+      TaskStatusEntity,
+      UserAvailabilityEntity,
+    ]),
+  ],
   providers: [
     {
       provide: TaskRepository,

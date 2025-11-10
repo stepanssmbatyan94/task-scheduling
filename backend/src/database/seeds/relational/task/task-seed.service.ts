@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { TaskEntity } from '../../../../tasks/infrastructure/persistence/relational/entities/task.entity';
 import { TaskStatusEntity } from '../../../../tasks/infrastructure/persistence/relational/entities/task-status.entity';
 import { UserEntity } from '../../../../users/infrastructure/persistence/relational/entities/user.entity';
+import { UserAvailabilityEntity } from '../../../../tasks/infrastructure/persistence/relational/entities/user-availability.entity';
 
 @Injectable()
 export class TaskSeedService {
@@ -14,6 +15,8 @@ export class TaskSeedService {
     private statusRepository: Repository<TaskStatusEntity>,
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    @InjectRepository(UserAvailabilityEntity)
+    private userAvailabilityRepository: Repository<UserAvailabilityEntity>,
   ) {}
 
   async run() {
@@ -125,15 +128,42 @@ export class TaskSeedService {
         },
       ];
 
-      await this.taskRepository.save(
+      const savedTasks = await this.taskRepository.save(
         tasks.map((task) =>
           this.taskRepository.create({
-            ...task,
-            assignedUserId: task.assignedUser?.id || null,
+            title: task.title,
+            description: task.description,
             statusId: task.status.id,
           }),
         ),
       );
+
+      const availabilityPayload = tasks
+        .map((task, index) => {
+          const userId = task.assignedUser
+            ? Number(task.assignedUser.id)
+            : null;
+          const startDate = task.startDate ?? null;
+          const endDate = task.endDate ?? null;
+          if (!userId && !startDate && !endDate) {
+            return undefined;
+          }
+
+          return this.userAvailabilityRepository.create({
+            taskId: savedTasks[index].id,
+            userId,
+            startDate,
+            endDate,
+          });
+        })
+        .filter(
+          (availability): availability is UserAvailabilityEntity =>
+            availability !== undefined,
+        );
+
+      if (availabilityPayload.length) {
+        await this.userAvailabilityRepository.save(availabilityPayload);
+      }
     }
   }
 }
