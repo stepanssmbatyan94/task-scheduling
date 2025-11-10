@@ -1,53 +1,147 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableForeignKey,
+  TableIndex,
+} from 'typeorm';
 
 export class CreateTaskTable1762432128423 implements MigrationInterface {
   name = 'CreateTaskTable1762432128423';
 
+  private readonly taskTitleIndex = new TableIndex({
+    name: 'IDX_task_title',
+    columnNames: ['title'],
+  });
+
+  private readonly taskStartDateIndex = new TableIndex({
+    name: 'IDX_task_start_date',
+    columnNames: ['startDate'],
+  });
+
+  private readonly taskEndDateIndex = new TableIndex({
+    name: 'IDX_task_end_date',
+    columnNames: ['endDate'],
+  });
+
+  private readonly taskStatusIndex = new TableIndex({
+    name: 'IDX_task_status_id',
+    columnNames: ['statusId'],
+  });
+
+  private readonly taskAssignedDateRangeIndex = new TableIndex({
+    name: 'IDX_task_assigned_range',
+    columnNames: ['assignedUserId', 'startDate', 'endDate'],
+  });
+
+  private readonly taskAssignedUserForeignKey = new TableForeignKey({
+    name: 'FK_task_assigned_user',
+    columnNames: ['assignedUserId'],
+    referencedTableName: 'user',
+    referencedColumnNames: ['id'],
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  });
+
+  private readonly taskStatusForeignKey = new TableForeignKey({
+    name: 'FK_task_status',
+    columnNames: ['statusId'],
+    referencedTableName: 'task_status',
+    referencedColumnNames: ['id'],
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  });
+
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `CREATE TABLE "task" ("id" SERIAL NOT NULL, "title" character varying NOT NULL, "description" character varying, "startDate" TIMESTAMP, "endDate" TIMESTAMP, "assignedUserId" integer, "statusId" integer, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, CONSTRAINT "PK_fb213f79ee45060ba925ecd576e" PRIMARY KEY ("id"))`,
+    await queryRunner.createTable(
+      new Table({
+        name: 'task',
+        columns: [
+          {
+            name: 'id',
+            type: 'int',
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'increment',
+          },
+          {
+            name: 'title',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'description',
+            type: 'varchar',
+            isNullable: true,
+          },
+          {
+            name: 'startDate',
+            type: 'timestamp',
+            isNullable: true,
+          },
+          {
+            name: 'endDate',
+            type: 'timestamp',
+            isNullable: true,
+          },
+          {
+            name: 'assignedUserId',
+            type: 'int',
+            isNullable: true,
+          },
+          {
+            name: 'statusId',
+            type: 'int',
+            isNullable: true,
+          },
+          {
+            name: 'createdAt',
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP',
+          },
+          {
+            name: 'updatedAt',
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP',
+          },
+          {
+            name: 'deletedAt',
+            type: 'timestamp',
+            isNullable: true,
+          },
+        ],
+      }),
+      true,
     );
-    await queryRunner.query(
-      `CREATE INDEX "IDX_3399e2710196ea4bf734751558" ON "task" ("title") `,
-    );
-    await queryRunner.query(
-      `CREATE INDEX "IDX_008a6ce926bcdbe5fa89abf1fb" ON "task" ("startDate") `,
-    );
-    await queryRunner.query(
-      `CREATE INDEX "IDX_82dd8c2ddcf7ffd6be5dd0cd5a" ON "task" ("endDate") `,
-    );
-    await queryRunner.query(
-      `CREATE INDEX "IDX_task_description" ON "task" ("description") `,
-    );
-    await queryRunner.query(
-      `CREATE INDEX "IDX_task_assignedUserId" ON "task" ("assignedUserId") `,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "task" ADD CONSTRAINT "FK_e3bd734666db0cb70e8c8d542c8" FOREIGN KEY ("assignedUserId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "task" ADD CONSTRAINT "FK_02068239bb8d5b2fc7f3ded618c" FOREIGN KEY ("statusId") REFERENCES "task_status"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
+
+    await queryRunner.createIndices('task', [
+      this.taskTitleIndex,
+      this.taskStartDateIndex,
+      this.taskEndDateIndex,
+      this.taskStatusIndex,
+      this.taskAssignedDateRangeIndex,
+    ]);
+
+    await queryRunner.createForeignKeys('task', [
+      this.taskAssignedUserForeignKey,
+      this.taskStatusForeignKey,
+    ]);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE "task" DROP CONSTRAINT "FK_02068239bb8d5b2fc7f3ded618c"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "task" DROP CONSTRAINT "FK_e3bd734666db0cb70e8c8d542c8"`,
-    );
-    await queryRunner.query(`DROP INDEX "public"."IDX_task_assignedUserId"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_task_description"`);
-    await queryRunner.query(
-      `DROP INDEX "public"."IDX_82dd8c2ddcf7ffd6be5dd0cd5a"`,
-    );
-    await queryRunner.query(
-      `DROP INDEX "public"."IDX_008a6ce926bcdbe5fa89abf1fb"`,
-    );
-    await queryRunner.query(
-      `DROP INDEX "public"."IDX_3399e2710196ea4bf734751558"`,
-    );
-    await queryRunner.query(`DROP TABLE "task"`);
+    await queryRunner.dropForeignKeys('task', [
+      this.taskStatusForeignKey,
+      this.taskAssignedUserForeignKey,
+    ]);
+
+    await queryRunner.dropIndices('task', [
+      this.taskAssignedDateRangeIndex,
+      this.taskStatusIndex,
+      this.taskEndDateIndex,
+      this.taskStartDateIndex,
+      this.taskTitleIndex,
+    ]);
+
+    await queryRunner.dropTable('task');
   }
 }

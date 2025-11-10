@@ -1,14 +1,20 @@
 services:
-  postgres:
-    image: postgres:17.6-alpine
+  mysql:
+    image: mysql:8.4
     ports:
-      - ${DATABASE_PORT}:5432
+      - ${DATABASE_PORT}:3306
     volumes:
-      - boilerplate-db:/var/lib/postgresql/data
+      - mysql-data:/var/lib/mysql
     environment:
-      POSTGRES_USER: ${DATABASE_USERNAME}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USERNAME}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p${DATABASE_ROOT_PASSWORD}"]
+      interval: 5s
+      retries: 20
+      timeout: 5s
 
   maildev:
     build:
@@ -36,6 +42,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - ${APP_PORT}:${APP_PORT}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      maildev:
+        condition: service_started
 
 volumes:
-  boilerplate-db:
+  mysql-data:

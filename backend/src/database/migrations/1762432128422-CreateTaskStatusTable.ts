@@ -1,15 +1,37 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 export class CreateTaskStatusTable1762432128422 implements MigrationInterface {
   name = 'CreateTaskStatusTable1762432128422';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `CREATE TABLE "task_status" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "order" integer NOT NULL, CONSTRAINT "PK_task_status" PRIMARY KEY ("id"))`,
+    await queryRunner.createTable(
+      new Table({
+        name: 'task_status',
+        columns: [
+          {
+            name: 'id',
+            type: 'int',
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'increment',
+          },
+          {
+            name: 'name',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'order',
+            type: 'int',
+            isNullable: false,
+          },
+        ],
+      }),
+      true,
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE "task_status"`);
+    await queryRunner.dropTable('task_status');
   }
 }

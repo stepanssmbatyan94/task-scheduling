@@ -1,19 +1,19 @@
 # Installation
 
-NestJS Boilerplate uses [TypeORM](https://www.npmjs.com/package/typeorm) for working with relational databases. By default, it targets [PostgreSQL](https://www.postgresql.org/), but you can switch to another relational database if needed.
+NestJS Boilerplate uses [TypeORM](https://www.npmjs.com/package/typeorm) with [MySQL](https://www.mysql.com/) out of the box. You can point it to a different relational database if required, but all shipped tooling assumes MySQL.
 
 ---
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Comfortable development (PostgreSQL + TypeORM)](#comfortable-development-postgresql--typeorm)
-  - [Video guideline (PostgreSQL + TypeORM)](#video-guideline-postgresql--typeorm)
-- [Quick run (PostgreSQL + TypeORM)](#quick-run-postgresql--typeorm)
+- [Comfortable development (MySQL + TypeORM)](#comfortable-development-mysql--typeorm)
+  - [Video guideline](#video-guideline)
+- [Quick run (MySQL + TypeORM)](#quick-run-mysql--typeorm)
 - [Links](#links)
 
 ---
 
-## Comfortable development (PostgreSQL + TypeORM)
+## Comfortable development (MySQL + TypeORM)
 
 1. Clone repository
 
@@ -21,52 +21,46 @@ NestJS Boilerplate uses [TypeORM](https://www.npmjs.com/package/typeorm) for wor
    git clone --depth 1 https://github.com/brocoders/nestjs-boilerplate.git my-app
    ```
 
-1. Go to folder, and copy `env-example-relational` as `.env`.
+1. Go to folder, and copy `env-example` as `.env`.
 
    ```bash
    cd my-app/
-   cp env-example-relational .env
+   cp env-example .env
    ```
 
-1. Change `DATABASE_HOST=postgres` to `DATABASE_HOST=localhost`
+1. Update the `.env` file if you plan to run MySQL locally. For Docker-based development keep `DATABASE_HOST=mysql`. For direct local usage change it to `localhost`.
 
-   Change `MAIL_HOST=maildev` to `MAIL_HOST=localhost`
-
-1. Run additional container:
+1. Start the infrastructure containers:
 
    ```bash
-   docker compose up -d postgres adminer maildev
+   docker compose up -d mysql adminer maildev
    ```
 
-1. Install dependency
+1. Install project dependencies:
 
    ```bash
    npm install
    ```
 
-1. Run app configuration
-
-   > You should run this command only the first time on initialization of your project, all next time skip it.
-
-   > If you want to contribute to the boilerplate, you should NOT run this command.
+1. Run the one-time app configuration (skip on subsequent runs):
 
    ```bash
    npm run app:config
    ```
 
-1. Run migrations
+1. Run migrations:
 
    ```bash
    npm run migration:run
    ```
 
-1. Run seeds
+1. Seed baseline data:
 
    ```bash
    npm run seed:run:relational
    ```
 
-1. Run app in dev mode
+1. Start the app in development mode:
 
    ```bash
    npm run start:dev
@@ -74,15 +68,17 @@ NestJS Boilerplate uses [TypeORM](https://www.npmjs.com/package/typeorm) for wor
 
 1. Open <http://localhost:3000>
 
-### Video guideline (PostgreSQL + TypeORM)
+### Video guideline
 
 <https://github.com/user-attachments/assets/136a16aa-f94a-4b20-8eaf-6b4262964315>
 
+> The video demonstrates the general bootstrap process. Swap the database-specific steps with the MySQL commands outlined above.
+
 ---
 
-## Quick run (PostgreSQL + TypeORM)
+## Quick run (MySQL + TypeORM)
 
-If you want quick run your app, you can use following commands:
+If you want a quick start, you can use the following commands:
 
 1. Clone repository
 
@@ -90,11 +86,11 @@ If you want quick run your app, you can use following commands:
    git clone --depth 1 https://github.com/brocoders/nestjs-boilerplate.git my-app
    ```
 
-1. Go to folder, and copy `env-example-relational` as `.env`.
+1. Go to folder, and copy `env-example` as `.env`.
 
    ```bash
    cd my-app/
-   cp env-example-relational .env
+   cp env-example .env
    ```
 
 1. Run containers
@@ -103,7 +99,7 @@ If you want quick run your app, you can use following commands:
    docker compose up -d
    ```
 
-1. For check status run
+1. Check container logs (optional)
 
    ```bash
    docker compose logs

@@ -75,20 +75,33 @@ class EnvironmentVariablesValidator {
 export default registerAs<DatabaseConfig>('database', () => {
   validateConfig(process.env, EnvironmentVariablesValidator);
 
+  const type = process.env.DATABASE_TYPE ?? 'mysql';
+  const parseNumber = (value: string | undefined, fallback: number) =>
+    value ? parseInt(value, 10) : fallback;
+  const resolveDefaultPort = () => {
+    if (process.env.DATABASE_PORT) {
+      return parseInt(process.env.DATABASE_PORT, 10);
+    }
+
+    if (type === 'postgres' || type === 'postgresql') {
+      return 5432;
+    }
+
+    return 3306;
+  };
+
+  const maxConnections = parseNumber(process.env.DATABASE_MAX_CONNECTIONS, 25);
+
   return {
     url: process.env.DATABASE_URL,
-    type: process.env.DATABASE_TYPE,
+    type,
     host: process.env.DATABASE_HOST,
-    port: process.env.DATABASE_PORT
-      ? parseInt(process.env.DATABASE_PORT, 10)
-      : 5432,
+    port: resolveDefaultPort(),
     password: process.env.DATABASE_PASSWORD,
     name: process.env.DATABASE_NAME,
     username: process.env.DATABASE_USERNAME,
     synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
-    maxConnections: process.env.DATABASE_MAX_CONNECTIONS
-      ? parseInt(process.env.DATABASE_MAX_CONNECTIONS, 10)
-      : 100,
+    maxConnections,
     sslEnabled: process.env.DATABASE_SSL_ENABLED === 'true',
     rejectUnauthorized: process.env.DATABASE_REJECT_UNAUTHORIZED === 'true',
     ca: process.env.DATABASE_CA,

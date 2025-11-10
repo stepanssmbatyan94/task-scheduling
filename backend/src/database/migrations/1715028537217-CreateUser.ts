@@ -1,79 +1,289 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableForeignKey,
+  TableIndex,
+  TableUnique,
+} from 'typeorm';
 
 export class CreateUser1715028537217 implements MigrationInterface {
   name = 'CreateUser1715028537217';
 
+  private readonly userSocialIdIndex = new TableIndex({
+    name: 'IDX_user_social_id',
+    columnNames: ['socialId'],
+  });
+
+  private readonly userFullNameIndex = new TableIndex({
+    name: 'IDX_user_full_name',
+    columnNames: ['firstName', 'lastName'],
+  });
+
+  private readonly sessionUserIndex = new TableIndex({
+    name: 'IDX_session_user_id',
+    columnNames: ['userId'],
+  });
+
+  private readonly userPhotoForeignKey = new TableForeignKey({
+    name: 'FK_user_photo',
+    columnNames: ['photoId'],
+    referencedTableName: 'file',
+    referencedColumnNames: ['id'],
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  });
+
+  private readonly userRoleForeignKey = new TableForeignKey({
+    name: 'FK_user_role',
+    columnNames: ['roleId'],
+    referencedTableName: 'role',
+    referencedColumnNames: ['id'],
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  });
+
+  private readonly userStatusForeignKey = new TableForeignKey({
+    name: 'FK_user_status',
+    columnNames: ['statusId'],
+    referencedTableName: 'status',
+    referencedColumnNames: ['id'],
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  });
+
+  private readonly sessionUserForeignKey = new TableForeignKey({
+    name: 'FK_session_user',
+    columnNames: ['userId'],
+    referencedTableName: 'user',
+    referencedColumnNames: ['id'],
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  });
+
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `CREATE TABLE "role" ("id" integer NOT NULL, "name" character varying NOT NULL, CONSTRAINT "PK_b36bcfe02fc8de3c57a8b2391c2" PRIMARY KEY ("id"))`,
+    await queryRunner.createTable(
+      new Table({
+        name: 'role',
+        columns: [
+          {
+            name: 'id',
+            type: 'int',
+            isPrimary: true,
+          },
+          {
+            name: 'name',
+            type: 'varchar',
+            isNullable: false,
+          },
+        ],
+      }),
+      true,
     );
-    await queryRunner.query(
-      `CREATE TABLE "status" ("id" integer NOT NULL, "name" character varying NOT NULL, CONSTRAINT "PK_e12743a7086ec826733f54e1d95" PRIMARY KEY ("id"))`,
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'status',
+        columns: [
+          {
+            name: 'id',
+            type: 'int',
+            isPrimary: true,
+          },
+          {
+            name: 'name',
+            type: 'varchar',
+            isNullable: false,
+          },
+        ],
+      }),
+      true,
     );
-    await queryRunner.query(
-      `CREATE TABLE "file" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "path" character varying NOT NULL, CONSTRAINT "PK_36b46d232307066b3a2c9ea3a1d" PRIMARY KEY ("id"))`,
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'file',
+        columns: [
+          {
+            name: 'id',
+            type: 'char',
+            length: '36',
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'uuid',
+          },
+          {
+            name: 'path',
+            type: 'varchar',
+            isNullable: false,
+          },
+        ],
+      }),
+      true,
     );
-    await queryRunner.query(
-      `CREATE TABLE "user" ("id" SERIAL NOT NULL, "email" character varying, "password" character varying, "provider" character varying NOT NULL DEFAULT 'email', "socialId" character varying, "firstName" character varying, "lastName" character varying, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, "photoId" uuid, "roleId" integer, "statusId" integer, CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"), CONSTRAINT "REL_75e2be4ce11d447ef43be0e374" UNIQUE ("photoId"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`,
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'user',
+        columns: [
+          {
+            name: 'id',
+            type: 'int',
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'increment',
+          },
+          {
+            name: 'email',
+            type: 'varchar',
+            isNullable: true,
+          },
+          {
+            name: 'password',
+            type: 'varchar',
+            isNullable: true,
+          },
+          {
+            name: 'provider',
+            type: 'varchar',
+            isNullable: false,
+            default: `'email'`,
+          },
+          {
+            name: 'socialId',
+            type: 'varchar',
+            isNullable: true,
+          },
+          {
+            name: 'firstName',
+            type: 'varchar',
+            isNullable: true,
+          },
+          {
+            name: 'lastName',
+            type: 'varchar',
+            isNullable: true,
+          },
+          {
+            name: 'createdAt',
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP',
+          },
+          {
+            name: 'updatedAt',
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP',
+          },
+          {
+            name: 'deletedAt',
+            type: 'timestamp',
+            isNullable: true,
+          },
+          {
+            name: 'photoId',
+            type: 'char',
+            length: '36',
+            isNullable: true,
+          },
+          {
+            name: 'roleId',
+            type: 'int',
+            isNullable: true,
+          },
+          {
+            name: 'statusId',
+            type: 'int',
+            isNullable: true,
+          },
+        ],
+        uniques: [
+          new TableUnique({
+            name: 'UQ_user_email',
+            columnNames: ['email'],
+          }),
+          new TableUnique({
+            name: 'UQ_user_photo',
+            columnNames: ['photoId'],
+          }),
+        ],
+      }),
+      true,
     );
-    await queryRunner.query(
-      `CREATE INDEX "IDX_9bd2fe7a8e694dedc4ec2f666f" ON "user" ("socialId") `,
+
+    await queryRunner.createIndices('user', [
+      this.userSocialIdIndex,
+      this.userFullNameIndex,
+    ]);
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'session',
+        columns: [
+          {
+            name: 'id',
+            type: 'int',
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'increment',
+          },
+          {
+            name: 'hash',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'createdAt',
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP',
+          },
+          {
+            name: 'updatedAt',
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP',
+          },
+          {
+            name: 'deletedAt',
+            type: 'timestamp',
+            isNullable: true,
+          },
+          {
+            name: 'userId',
+            type: 'int',
+            isNullable: true,
+          },
+        ],
+      }),
+      true,
     );
-    await queryRunner.query(
-      `CREATE INDEX "IDX_58e4dbff0e1a32a9bdc861bb29" ON "user" ("firstName") `,
-    );
-    await queryRunner.query(
-      `CREATE INDEX "IDX_f0e1b4ecdca13b177e2e3a0613" ON "user" ("lastName") `,
-    );
-    await queryRunner.query(
-      `CREATE TABLE "session" ("id" SERIAL NOT NULL, "hash" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, "userId" integer, CONSTRAINT "PK_f55da76ac1c3ac420f444d2ff11" PRIMARY KEY ("id"))`,
-    );
-    await queryRunner.query(
-      `CREATE INDEX "IDX_3d2f174ef04fb312fdebd0ddc5" ON "session" ("userId") `,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user" ADD CONSTRAINT "FK_75e2be4ce11d447ef43be0e374f" FOREIGN KEY ("photoId") REFERENCES "file"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user" ADD CONSTRAINT "FK_c28e52f758e7bbc53828db92194" FOREIGN KEY ("roleId") REFERENCES "role"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user" ADD CONSTRAINT "FK_dc18daa696860586ba4667a9d31" FOREIGN KEY ("statusId") REFERENCES "status"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "session" ADD CONSTRAINT "FK_3d2f174ef04fb312fdebd0ddc53" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
+
+    await queryRunner.createIndex('session', this.sessionUserIndex);
+
+    await queryRunner.createForeignKeys('user', [
+      this.userPhotoForeignKey,
+      this.userRoleForeignKey,
+      this.userStatusForeignKey,
+    ]);
+    await queryRunner.createForeignKey('session', this.sessionUserForeignKey);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE "session" DROP CONSTRAINT "FK_3d2f174ef04fb312fdebd0ddc53"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user" DROP CONSTRAINT "FK_dc18daa696860586ba4667a9d31"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user" DROP CONSTRAINT "FK_c28e52f758e7bbc53828db92194"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user" DROP CONSTRAINT "FK_75e2be4ce11d447ef43be0e374f"`,
-    );
-    await queryRunner.query(
-      `DROP INDEX "public"."IDX_3d2f174ef04fb312fdebd0ddc5"`,
-    );
-    await queryRunner.query(`DROP TABLE "session"`);
-    await queryRunner.query(
-      `DROP INDEX "public"."IDX_f0e1b4ecdca13b177e2e3a0613"`,
-    );
-    await queryRunner.query(
-      `DROP INDEX "public"."IDX_58e4dbff0e1a32a9bdc861bb29"`,
-    );
-    await queryRunner.query(
-      `DROP INDEX "public"."IDX_9bd2fe7a8e694dedc4ec2f666f"`,
-    );
-    await queryRunner.query(`DROP TABLE "user"`);
-    await queryRunner.query(`DROP TABLE "file"`);
-    await queryRunner.query(`DROP TABLE "status"`);
-    await queryRunner.query(`DROP TABLE "role"`);
+    await queryRunner.dropForeignKey('session', this.sessionUserForeignKey);
+    await queryRunner.dropForeignKeys('user', [
+      this.userStatusForeignKey,
+      this.userRoleForeignKey,
+      this.userPhotoForeignKey,
+    ]);
+
+    await queryRunner.dropIndex('session', this.sessionUserIndex);
+    await queryRunner.dropIndices('user', [
+      this.userFullNameIndex,
+      this.userSocialIdIndex,
+    ]);
+
+    await queryRunner.dropTable('session');
+    await queryRunner.dropTable('user');
+    await queryRunner.dropTable('file');
+    await queryRunner.dropTable('status');
+    await queryRunner.dropTable('role');
   }
 }
