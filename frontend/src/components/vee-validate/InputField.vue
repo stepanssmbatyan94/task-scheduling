@@ -3,6 +3,7 @@
     <FormItem :name :label :required :error-message="errorMessage" :extra>
       <InputText
         v-bind="componentField"
+        :type="type ?? 'text'"
         :aria-labelledby="name"
         :invalid="!!errorMessage"
         :disabled

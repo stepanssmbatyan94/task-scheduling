@@ -4,9 +4,15 @@
 
 import { computed } from 'vue';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
-import { fetchTasksApi, updateTaskApi } from '../task-api';
+import { fetchTasksApi, updateTaskApi, createTaskApi } from '../task-api';
 import { useTaskStatuses } from './useTaskStatuses';
-import type { AssignableUser, Task, TaskAssignedUser, TasksResponse } from '../task-type';
+import type {
+  AssignableUser,
+  CreateTaskPayload,
+  Task,
+  TaskAssignedUser,
+  TasksResponse
+} from '../task-type';
 import type { KanbanItem, Lane } from '../components/types';
 
 const TASKS_QUERY_KEY = ['tasks'] as const;
@@ -215,6 +221,46 @@ export function useTasks() {
     }
   });
 
+  const {
+    mutateAsync: createTask,
+    isPending: isCreatingTask,
+    isError: isCreatingTaskError,
+    error: createTaskError
+  } = useMutation<
+    Task,
+    unknown,
+    CreateTaskPayload,
+    { previousData?: TasksResponse }
+  >({
+    mutationFn: (payload) => createTaskApi(payload),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: TASKS_QUERY_KEY });
+
+      const previousData = queryClient.getQueryData<TasksResponse>(tasksQueryKey);
+      return { previousData };
+    },
+    onSuccess: (createdTask) => {
+      queryClient.setQueryData<TasksResponse | undefined>(tasksQueryKey, (previous) => {
+        if (!previous) {
+          return previous;
+        }
+
+        return {
+          ...previous,
+          data: [createdTask, ...previous.data]
+        };
+      });
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(tasksQueryKey, context.previousData);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });
+    }
+  });
+
   const kanbanItems = computed<KanbanItem[]>(() => {
     return tasks.value.map(transformTaskToKanbanItem);
   });
@@ -257,6 +303,10 @@ export function useTasks() {
     isUpdatingTaskStatus,
     isUpdatingTaskStatusError,
     updateTaskStatusError,
+    createTask,
+    isCreatingTask,
+    isCreatingTaskError,
+    createTaskError,
     assignTaskUser,
     isAssigningTaskUser,
     isAssigningTaskUserError,

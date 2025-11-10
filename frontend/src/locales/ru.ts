@@ -101,11 +101,26 @@ export default {
     assignee: 'Исполнитель',
     unassigned: 'Не назначено',
     emptyState: 'Нет элементов',
+    fields: {
+      title: 'Название',
+      description: 'Описание',
+      startDate: 'Дата начала',
+      endDate: 'Дата окончания',
+      assignedUser: 'Исполнитель',
+      status: 'Статус'
+    },
+    placeholders: {
+      title: 'Введите название задачи',
+      description: 'Введите описание задачи (по желанию)',
+      assignedUser: 'Выберите исполнителя',
+      status: 'Выберите статус'
+    },
     messages: {
       loading: 'Загрузка задач...',
       loadError: 'Не удалось загрузить задачи. Повторите попытку.',
       statusUpdating: 'Обновление статуса задачи...',
-      statusFailed: 'Не удалось обновить статус задачи. Повторите попытку.'
+      statusFailed: 'Не удалось обновить статус задачи. Повторите попытку.',
+      createSuccess: 'Задача успешно создана.'
     },
     assignment: {
       loading: 'Загрузка списка сотрудников...',
@@ -139,6 +154,12 @@ export default {
   errors: {
     generic: 'Произошла ошибка. Повторите попытку позже.',
     userHasOverlappingTask: 'У пользователя уже есть задача в указанный период.'
+  },
+  validation: {
+    required: 'Поле «{field}» обязательно для заполнения.',
+    maxCharacters: 'Допускается не более {count} символов.',
+    invalidDate: 'Выбрана недопустимая дата.',
+    endDateBeforeStartDate: 'Дата окончания не может быть раньше даты начала.'
   }
 };
 

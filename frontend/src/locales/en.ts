@@ -101,11 +101,26 @@ export default {
     assignee: 'Assignee',
     unassigned: 'Unassigned',
     emptyState: 'No items',
+    fields: {
+      title: 'Title',
+      description: 'Description',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+      assignedUser: 'Assigned User',
+      status: 'Status'
+    },
+    placeholders: {
+      title: 'Enter task title',
+      description: 'Enter task description (optional)',
+      assignedUser: 'Select a team member',
+      status: 'Select status'
+    },
     messages: {
       loading: 'Loading tasks...',
       loadError: 'Error loading tasks. Please try again.',
       statusUpdating: 'Updating task status...',
-      statusFailed: 'Failed to update task status. Please try again.'
+      statusFailed: 'Failed to update task status. Please try again.',
+      createSuccess: 'Task created successfully.'
     },
     assignment: {
       loading: 'Loading team members...',
@@ -137,5 +152,11 @@ export default {
   errors: {
     generic: 'Something went wrong. Please try again.',
     userHasOverlappingTask: 'This user already has a task scheduled during this period.'
+  },
+  validation: {
+    required: '{field} is required.',
+    maxCharacters: 'Maximum {count} characters allowed.',
+    invalidDate: 'Invalid date selected.',
+    endDateBeforeStartDate: 'End date cannot be before start date.'
   }
 };

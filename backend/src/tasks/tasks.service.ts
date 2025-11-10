@@ -18,7 +18,6 @@ export class TasksService {
   constructor(private readonly tasksRepository: TaskRepository) {}
 
   async create(createTaskDto: CreateTaskDto): Promise<Task> {
-    // Validate date range if both dates are provided
     if (createTaskDto.startDate && createTaskDto.endDate) {
       if (createTaskDto.endDate < createTaskDto.startDate) {
         throw new UnprocessableEntityException({
@@ -30,7 +29,6 @@ export class TasksService {
       }
     }
 
-    // Check for overlapping tasks if user is assigned and dates are provided
     if (
       createTaskDto.assignedUser?.id &&
       createTaskDto.startDate &&

@@ -1,5 +1,5 @@
 import { Http } from '@/services/Http';
-import type { Task, TasksResponse, UpdateTaskPayload } from './task-type';
+import type { CreateTaskPayload, Task, TasksResponse, UpdateTaskPayload } from './task-type';
 
 const API_ENDPOINT = 'tasks';
 
@@ -37,4 +37,9 @@ export async function updateTaskApi(
 ): Promise<Task> {
   const response = await Http.patch<Task, UpdateTaskPayload>(`${API_ENDPOINT}/${id}`, values);
   return response as Task;
+}
+
+export async function createTaskApi(values: CreateTaskPayload): Promise<Task> {
+  const response = await Http.post<SuccessResponse<Task>, CreateTaskPayload>(API_ENDPOINT, values);
+  return response!.data!;
 }

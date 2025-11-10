@@ -42,6 +42,19 @@ export interface TasksResponse {
   hasNextPage: boolean;
 }
 
+export interface CreateTaskPayload {
+  title: string;
+  description?: string | null;
+  startDate: string;
+  endDate: string;
+  assignedUser: {
+    id: number | string;
+  };
+  status: {
+    id: number | string;
+  };
+}
+
 export interface UpdateTaskPayload {
   title?: string;
   description?: string | null;

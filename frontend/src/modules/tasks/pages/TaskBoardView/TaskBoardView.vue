@@ -53,12 +53,22 @@
         </div>
       </Card>
     </PageContent>
+
+    <TaskCreateModal
+      :visible="showCreateModal"
+      :statuses="taskStatuses"
+      :assignable-users="assignableUsers"
+      :assignable-users-loading="assignmentLoading"
+      :is-submitting="isCreatingTask"
+      @close="closeCreateModal"
+      @submit="handleCreateTask"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { KanbanBoard } from '../../components';
+import { KanbanBoard, TaskCreateModal } from '../../components';
 import { useTasks } from '../../composables/useTasks';
 import { useAssignableUsers } from '../../composables/useAssignableUsers';
 
@@ -72,7 +82,8 @@ import {
 import { useTranslation } from '@/composables';
 import type { BreadcrumbItemProps } from '@/types';
 import type { KanbanItem } from '../../components/types';
-import type { AssignableUser } from '../../task-type';
+import type { AssignableUser, CreateTaskPayload } from '../../task-type';
+import { toast } from 'vue3-toastify';
 
 const { t } = useTranslation();
 
@@ -87,7 +98,9 @@ const {
   isUpdatingTaskStatus,
   updateTaskStatusError,
   assignTaskUser,
-  isAssigningTaskUser
+  isAssigningTaskUser,
+  createTask,
+  isCreatingTask
 } = useTasks();
 
 const {
@@ -100,6 +113,8 @@ const {
 const assignmentLoading = computed(
   () => isLoadingAssignableUsers.value || isFetchingAssignableUsers.value
 );
+
+const showCreateModal = ref(false);
 
 // Breadcrumb
 const breadcrumbItems = ref<BreadcrumbItemProps[]>([
@@ -159,17 +174,21 @@ const resolveTaskId = (item: KanbanItem): number | null => {
   return Number.isNaN(taskId) ? null : taskId;
 };
 
-const handleAssignUser = (item: KanbanItem, user: AssignableUser | null) => {
+const handleAssignUser = async (item: KanbanItem, user: AssignableUser | null) => {
   const taskId = resolveTaskId(item);
 
   if (taskId === null) {
     return;
   }
 
-  assignTaskUser({
-    id: taskId,
-    user
-  });
+  try {
+    await assignTaskUser({
+      id: taskId,
+      user
+    });
+  } catch (error) {
+    console.error('Failed to assign task user', error);
+  }
 };
 
 const handleItemClicked = (item: KanbanItem) => {
@@ -178,8 +197,21 @@ const handleItemClicked = (item: KanbanItem) => {
 };
 
 const openCreateModal = () => {
-  // TODO: Open create task modal
-  console.log('Open create task modal');
+  showCreateModal.value = true;
+};
+
+const closeCreateModal = () => {
+  showCreateModal.value = false;
+};
+
+const handleCreateTask = async (payload: CreateTaskPayload) => {
+  try {
+    await createTask(payload);
+    toast.success(t('tasks.messages.createSuccess'));
+    closeCreateModal();
+  } catch (error) {
+    console.error('Failed to create task', error);
+  }
 };
 </script>
 
