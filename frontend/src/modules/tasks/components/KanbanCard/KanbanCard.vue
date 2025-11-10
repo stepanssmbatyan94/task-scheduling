@@ -95,7 +95,10 @@
       </div>
     </div>
     <p v-if="item.description" class="kanban-card-description">
-      {{ item.description }}
+      {{ truncatedDescription }}
+      <span v-if="shouldShowDescriptionTooltip" class="kanban-card-description-more">
+        (…)
+      </span>
     </p>
     <div class="kanban-card-footer">
       <span v-if="item.assignedUser" class="kanban-card-assignee">
@@ -171,6 +174,22 @@ const assignedUserDisplayName = computed(() => {
   }
 
   return user.email ?? t('tasks.assignment.noEmail');
+});
+
+const DESCRIPTION_CHAR_LIMIT = 160;
+
+const truncatedDescription = computed(() => {
+  if (!props.item.description) {
+    return '';
+  }
+
+  return props.item.description.length > DESCRIPTION_CHAR_LIMIT
+    ? props.item.description.slice(0, DESCRIPTION_CHAR_LIMIT).trimEnd()
+    : props.item.description;
+});
+
+const shouldShowDescriptionTooltip = computed(() => {
+  return Boolean(props.item.description && props.item.description.length > DESCRIPTION_CHAR_LIMIT);
 });
 
 const formatAssignableUserName = (user: AssignableUser): string => {

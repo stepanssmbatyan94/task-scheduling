@@ -51,6 +51,13 @@
   color: #6b7280;
   margin: 0 0 8px 0;
   line-height: 1.4;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.kanban-card-description-more {
+  color: #6b7280;
 }
 
 .kanban-card-footer {
