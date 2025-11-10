@@ -177,7 +177,6 @@ const taskFilters = computed(() => {
   return Object.keys(filters).length > 0 ? filters : undefined;
 });
 
-// Fetch tasks from API
 const {
   tasks,
   kanbanItems,
