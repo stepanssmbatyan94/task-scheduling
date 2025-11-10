@@ -46,12 +46,6 @@
             >
               {{ t('tasks.assignment.inProgress') }}
             </div>
-            <div
-              v-if="assignmentErrorMessage"
-              class="kanban-feedback-message kanban-feedback-message--error"
-            >
-              {{ assignmentErrorMessage }}
-            </div>
           </div>
         </div>
         <div v-else class="text-center py-8 text-gray-500">
@@ -93,8 +87,7 @@ const {
   isUpdatingTaskStatus,
   updateTaskStatusError,
   assignTaskUser,
-  isAssigningTaskUser,
-  assignTaskUserError
+  isAssigningTaskUser
 } = useTasks();
 
 const {
@@ -103,8 +96,6 @@ const {
   isFetching: isFetchingAssignableUsers,
   isError: isErrorAssignableUsers
 } = useAssignableUsers();
-
-const assignmentErrorMessage = ref<string | null>(null);
 
 const assignmentLoading = computed(
   () => isLoadingAssignableUsers.value || isFetchingAssignableUsers.value
@@ -168,55 +159,17 @@ const resolveTaskId = (item: KanbanItem): number | null => {
   return Number.isNaN(taskId) ? null : taskId;
 };
 
-const parseAssignmentError = (error: unknown): string => {
-  const defaultMessage = t('tasks.assignment.errors.generic');
-
-  if (error && typeof error === 'object') {
-    const errorObject = error as Record<string, any>;
-
-    if (errorObject.errors && typeof errorObject.errors === 'object') {
-      const assignedUserError = errorObject.errors.assignedUser;
-
-      if (assignedUserError === 'userHasOverlappingTask') {
-        return t('tasks.assignment.errors.overlap');
-      }
-
-      if (typeof assignedUserError === 'string') {
-        return assignedUserError;
-      }
-    }
-
-    if (typeof errorObject.message === 'string') {
-      return errorObject.message;
-    }
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return defaultMessage;
-};
-
-const handleAssignUser = async (item: KanbanItem, user: AssignableUser | null) => {
+const handleAssignUser = (item: KanbanItem, user: AssignableUser | null) => {
   const taskId = resolveTaskId(item);
 
   if (taskId === null) {
-    console.warn('Unable to assign task: invalid task identifier', item);
     return;
   }
 
-  assignmentErrorMessage.value = null;
-
-  try {
-    await assignTaskUser({
-      id: taskId,
-      user
-    });
-  } catch (e) {
-    const message = parseAssignmentError(e ?? assignTaskUserError.value);
-    assignmentErrorMessage.value = message;
-  }
+  assignTaskUser({
+    id: taskId,
+    user
+  });
 };
 
 const handleItemClicked = (item: KanbanItem) => {

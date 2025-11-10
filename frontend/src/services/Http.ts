@@ -2,6 +2,7 @@ import type { AxiosRequestConfig } from 'axios';
 import queryString from 'query-string';
 
 import axios from '@/config/axios';
+import { handleApiError } from './error-handler';
 
 export class Http {
   private static getError = (error: unknown) => {
@@ -21,6 +22,8 @@ export class Http {
       console.log('Request aborted:', axiosError.message ?? 'unknown reason');
       return;
     }
+
+    handleApiError(error);
 
     if (axiosError?.response) {
       const { data, status, statusText } = axiosError.response;

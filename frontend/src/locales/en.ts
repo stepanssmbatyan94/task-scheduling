@@ -133,5 +133,9 @@ export default {
         upcoming: 'Due in {count} day | Due in {count} days'
       }
     }
+  },
+  errors: {
+    generic: 'Something went wrong. Please try again.',
+    userHasOverlappingTask: 'This user already has a task scheduled during this period.'
   }
 };
