@@ -21,6 +21,15 @@
   min-width: 16rem;
 }
 
+.task-board-filters__search-wrapper {
+  display: inline-flex;
+  align-items: center;
+}
+
+.task-board-filters__search {
+  min-width: 16rem;
+}
+
 .task-board-filters__clear {
   flex-shrink: 0;
 }

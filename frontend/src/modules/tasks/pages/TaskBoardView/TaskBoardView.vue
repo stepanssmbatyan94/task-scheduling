@@ -14,6 +14,23 @@
     <PageContent>
       <Card class="p-4">
         <div class="task-board-filters">
+          <span class="p-input-icon-left task-board-filters__search-wrapper">
+            <i class="pi pi-search mr-2" />
+            <InputText
+              v-model="searchTerm"
+              :placeholder="t('tasks.filters.searchPlaceholder')"
+              class="task-board-filters__search"
+            />
+          </span>
+          <Button
+            v-if="trimmedSearchTerm.length > 0"
+            severity="secondary"
+            size="small"
+            icon="pi pi-times"
+            :label="t('tasks.filters.clearSearch')"
+            class="task-board-filters__clear"
+            @click="clearSearch"
+          />
           <MultiSelect
             v-model="selectedUserIds"
             :options="userFilterOptions"
@@ -115,6 +132,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import MultiSelect from 'primevue/multiselect';
+import InputText from 'primevue/inputtext';
 import { KanbanBoard, TaskFormModal, TaskViewModal } from '../../components';
 import { useTasks } from '../../composables/useTasks';
 import { useAssignableUsers } from '../../composables/useAssignableUsers';
@@ -126,7 +144,7 @@ import {
   PageContent,
   PageTitle
 } from '@/components';
-import { useTranslation } from '@/composables';
+import { useDebouncedRef, useTranslation } from '@/composables';
 import type { BreadcrumbItemProps } from '@/types';
 import type { KanbanItem } from '../../components/types';
 import type { AssignableUser, CreateTaskPayload, Task, UpdateTaskPayload } from '../../task-type';
@@ -135,19 +153,28 @@ import { toast } from 'vue3-toastify';
 const { t } = useTranslation();
 
 const selectedUserIds = ref<string[]>([]);
+const searchTerm = ref('');
+const debouncedSearchTerm = useDebouncedRef(searchTerm, 300);
+const trimmedSearchTerm = computed(() => debouncedSearchTerm.value.trim());
 const taskFilters = computed(() => {
-  if (selectedUserIds.value.length === 0) {
-    return undefined;
+  const filters: Record<string, unknown> = {};
+
+  const userIds = selectedUserIds.value
+    .map((id) => {
+      const numericId = Number(id);
+      return Number.isNaN(numericId) ? id : numericId;
+    })
+    .filter((id) => id !== undefined && id !== null);
+
+  if (userIds.length > 0) {
+    filters.assignedUsers = userIds.map((id) => ({ id }));
   }
 
-  return {
-    assignedUsers: selectedUserIds.value.map((id) => {
-      const numericId = Number(id);
-      return {
-        id: Number.isNaN(numericId) ? id : numericId
-      };
-    })
-  };
+  if (trimmedSearchTerm.value.length > 0) {
+    filters.search = trimmedSearchTerm.value;
+  }
+
+  return Object.keys(filters).length > 0 ? filters : undefined;
 });
 
 // Fetch tasks from API
@@ -343,6 +370,10 @@ const handleUpdateTask = async (payload: CreateTaskPayload) => {
 
 const clearSelectedUsers = () => {
   selectedUserIds.value = [];
+};
+
+const clearSearch = () => {
+  searchTerm.value = '';
 };
 
 const formatUserDisplayName = (user: AssignableUser): string => {

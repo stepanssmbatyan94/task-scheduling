@@ -117,6 +117,8 @@ export default {
       status: 'Select status'
     },
     filters: {
+      searchPlaceholder: 'Search tasks',
+      clearSearch: 'Clear search',
       assignedUsersPlaceholder: 'Filter by assignees',
       clearAssignedUsers: 'Clear'
     },

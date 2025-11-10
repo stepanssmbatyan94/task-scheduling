@@ -66,10 +66,31 @@ export class TasksRelationalRepository implements TaskRepository {
     };
 
     if (filterOptions?.search) {
-      applyFilter(
-        '(task.title ILIKE :search OR task.description ILIKE :search)',
-        { search: `%${filterOptions.search}%` },
-      );
+      const trimmedSearch = filterOptions.search.trim();
+
+      if (trimmedSearch.length > 0) {
+        const sanitizedTerms = trimmedSearch
+          .split(/\s+/)
+          .map((term) => term.replace(/[+\-><()~*"@!#%^&=]/g, '').trim())
+          .filter((term) => term.length > 0);
+
+        if (sanitizedTerms.length > 0) {
+          const booleanModeSearch = sanitizedTerms
+            .map((term) => `+${term}*`)
+            .join(' ');
+
+
+          applyFilter(
+            'MATCH(task.title, task.description) AGAINST (:booleanSearch IN BOOLEAN MODE)',
+            { booleanSearch: booleanModeSearch },
+          );
+        } else {
+          applyFilter(
+            '(task.title LIKE :fallbackSearch OR task.description LIKE :fallbackSearch)',
+            { fallbackSearch: `%${trimmedSearch}%` },
+          );
+        }
+      }
     }
 
     const assignedUserIds = new Set<number>();

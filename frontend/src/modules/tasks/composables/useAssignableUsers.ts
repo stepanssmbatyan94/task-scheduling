@@ -19,7 +19,6 @@ export function useAssignableUsers() {
     queryFn: fetchAssignableUsersApi,
     staleTime: 60_000
   });
-
   const assignableUsers = computed<AssignableUser[]>(() => data.value ?? []);
 
   return {

@@ -117,6 +117,8 @@ export default {
       status: 'Выберите статус'
     },
     filters: {
+      searchPlaceholder: 'Поиск задач',
+      clearSearch: 'Очистить поиск',
       assignedUsersPlaceholder: 'Фильтр по исполнителям',
       clearAssignedUsers: 'Очистить'
     },
