@@ -2,8 +2,8 @@
   <nav class="flex text-sm mb-4" aria-label="Breadcrumb">
     <ol class="inline-flex items-center text-[#303133] dark:text-[#E5EAF3]">
       <li class="inline-flex items-center">
-        <RouterLink to="/" class="inline-flex items-center">
-          {{ t('dashboard') }}
+        <RouterLink :to="AppRoute.TASKS" class="inline-flex items-center">
+          {{ t('home') }}
         </RouterLink>
       </li>
       <li v-for="{ title, to } in items" :key="title">
@@ -26,6 +26,7 @@ import { ChevronRight } from 'lucide-vue-next';
 import { RouterLink, type RouteLocationRaw } from 'vue-router';
 
 import { useTranslation } from '@/composables';
+import { AppRoute } from '@/constants';
 
 export interface BreadcrumbItemProps {
   title: string;

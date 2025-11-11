@@ -230,9 +230,6 @@ const selectedTask = ref<Task | null>(null);
 
 const breadcrumbItems = ref<BreadcrumbItemProps[]>([
   {
-    title: t('dashboard')
-  },
-  {
     title: t('tasks.board')
   }
 ]);

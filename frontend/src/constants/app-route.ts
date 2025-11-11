@@ -2,7 +2,6 @@ export const AppRoute = {
   UNAUTHORIZE: '/unauthorize',
 
   LOGIN: '/login',
-  DASHBOARD: '/dashboard',
 
   USER: '/users',
   USER_CREATE: '/users/create',

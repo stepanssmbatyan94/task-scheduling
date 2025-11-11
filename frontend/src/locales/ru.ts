@@ -63,7 +63,7 @@ export default {
     }
   },
 
-  dashboard: 'Панель управления',
+  home: 'Главная',
   userManagement: 'Управление пользователями',
   user: {
     label: 'Пользователь',

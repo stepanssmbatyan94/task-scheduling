@@ -6,7 +6,7 @@ import TaskBoardView from './pages/TaskBoardView';
 export const taskRoutes: RouteRecordRaw[] = [
   {
     path: AppRoute.TASKS,
-    name: 'Tasks',
+    name: AppRoute.TASKS,
     component: TaskBoardView,
     meta: {
       requiresAuth: true,

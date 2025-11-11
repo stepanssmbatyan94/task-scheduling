@@ -116,10 +116,6 @@ The boilerplate of Vue v3, Typescript, Vite, Vue Router, Pinia, Axios, Tailwind 
 │   │   │   ├── currentUserApi.ts
 │   │   │   ├── currentUserStore.ts
 │   │   │   └── currentUserType.ts
-│   │   ├── dashboard
-│   │   │   ├── DashboardView.vue
-│   │   │   ├── OverviewView.vue
-│   │   │   └── RecentSales.vue
 │   │   ├── exception
 │   │   │   ├── NotFound.vue
 │   │   │   └── UnauthorizeView.vue

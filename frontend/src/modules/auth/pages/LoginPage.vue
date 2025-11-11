@@ -81,7 +81,7 @@ const {
       if (route.query?.redirect) {
         router.push({ path: route.query.redirect as string, replace: true });
       } else {
-        router.push({ name: AppRoute.DASHBOARD, replace: true });
+        router.push({ name: AppRoute.TASKS, replace: true });
       }
     }
   }

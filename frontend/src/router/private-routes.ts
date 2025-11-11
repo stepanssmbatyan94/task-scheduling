@@ -10,11 +10,8 @@ export const privateRoutes: RouteRecordRaw[] = [
     component: () => import('@/layouts/master-layout/AppMasterLayout.vue'),
     children: [
       {
-        path: AppRoute.DASHBOARD,
-        name: AppRoute.DASHBOARD,
-        component: () => import('@/modules/dashboard/DashboardView.vue'),
-        alias: ['/'],
-        meta: { requiresAuth: true }
+        path: '',
+        redirect: AppRoute.TASKS
       },
       ...userRoutes,
       ...taskRoutes

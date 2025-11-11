@@ -63,7 +63,7 @@ export default {
     }
   },
 
-  dashboard: 'Dashboard',
+  home: 'Home',
   userManagement: 'User Management',
   user: {
     label: 'User',
