@@ -112,9 +112,9 @@ export class TasksController {
     type: Task,
   })
   @SerializeOptions({
-    groups: ['admin'],
+    groups: ['admin', 'user'],
   })
-  @Roles(RoleEnum.admin)
+  @Roles(RoleEnum.admin, RoleEnum.user)
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @ApiParam({
