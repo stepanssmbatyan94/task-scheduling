@@ -36,6 +36,8 @@ type MulterS3Options = Exclude<Parameters<typeof multerS3>[0], undefined>;
           },
         });
 
+        const s3Client = s3 as unknown as MulterS3Options['s3'];
+
         return {
           fileFilter: (request, file, callback) => {
             if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
@@ -53,9 +55,7 @@ type MulterS3Options = Exclude<Parameters<typeof multerS3>[0], undefined>;
             callback(null, true);
           },
           storage: multerS3({
-            // @types/multer-s3 ships its own copy of @aws-sdk/client-s3, so we cast
-            // to bridge the identical runtime shape between the duplicated types.
-            s3: s3 as unknown as MulterS3Options['s3'],
+            s3: s3Client,
             bucket: '',
             acl: 'public-read',
             contentType: multerS3.AUTO_CONTENT_TYPE,

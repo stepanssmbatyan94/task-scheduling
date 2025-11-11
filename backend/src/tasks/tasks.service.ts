@@ -124,7 +124,6 @@ export class TasksService {
       });
     }
 
-    // Validate date range if dates are being updated
     const startDate =
       updateTaskDto.startDate !== undefined
         ? updateTaskDto.startDate
@@ -143,7 +142,6 @@ export class TasksService {
       });
     }
 
-    // Check for overlapping tasks if user is being assigned or reassigned and dates are provided
     let assignedUserId: number | null;
 
     if (updateTaskDto.assignedUser === null) {
@@ -157,12 +155,13 @@ export class TasksService {
     }
 
     if (assignedUserId && startDate && endDate) {
+      const taskIdToExclude = id;
       const overlappingTasks =
         await this.tasksRepository.findByAssignedUserAndDateRange(
           assignedUserId,
           startDate,
           endDate,
-          id, // Exclude current task
+          taskIdToExclude,
         );
 
       if (overlappingTasks.length > 0) {

@@ -6,7 +6,6 @@ import ru from './ru';
 import { getLocale } from '@/services/app-service';
 import { LOCALE_KEYS, Locales } from './constants';
 
-// Type-define 'en-US' as the master schema for the resource
 export type MessageSchema = typeof en;
 export const messages = {
   [Locales.EN]: en,
@@ -14,10 +13,7 @@ export const messages = {
 };
 
 export const i18n = createI18n<[MessageSchema], string>({
-  // you must set `false`, to use Composition API. see more https://vue-i18n.intlify.dev/guide/advanced/composition.html
   legacy: false,
-
-  // Refer a global scope Composer instance of i18n
   globalInjection: true,
 
   locale: getLocale() ?? Locales.EN,

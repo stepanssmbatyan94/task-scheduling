@@ -33,11 +33,12 @@ export function useKanbanDragDrop(
     try {
       const item: KanbanItem = JSON.parse(data);
 
-      // Only emit update if item is being moved to a different lane
-      if (item.status !== currentLaneSlug) {
-        const updatedItem = createUpdatedItem(item, currentLaneSlug);
-        onItemUpdated(updatedItem, currentLaneSlug);
+      if (item.status === currentLaneSlug) {
+        return;
       }
+
+      const updatedItem = createUpdatedItem(item, currentLaneSlug);
+      onItemUpdated(updatedItem, currentLaneSlug);
     } catch (error) {
       console.error('Error parsing dropped item:', error);
     } finally {

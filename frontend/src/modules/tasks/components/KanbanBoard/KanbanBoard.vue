@@ -67,7 +67,6 @@ const handleAssignUser = (item: KanbanItem, user: AssignableUser | null) => {
   emit('assign-user', item, user);
 };
 
-// Use drag handler for drag start
 const { handleDragStart } = useKanbanDragDrop('', handleItemUpdated);
 
 const handleDrop = (event: DragEvent, laneSlug: string) => {
@@ -81,10 +80,11 @@ const handleDrop = (event: DragEvent, laneSlug: string) => {
   try {
     const item: KanbanItem = JSON.parse(data);
 
-    // Only emit update if item is being moved to a different lane
-    if (item.status !== laneSlug) {
-      handleItemUpdated(item, laneSlug);
+    if (item.status === laneSlug) {
+      return;
     }
+
+    handleItemUpdated(item, laneSlug);
   } catch (error) {
     console.error('Error parsing dropped item:', error);
   }

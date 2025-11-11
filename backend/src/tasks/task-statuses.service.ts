@@ -14,7 +14,6 @@ export class TaskStatusesService {
   constructor(private readonly taskStatusRepository: TaskStatusRepository) {}
 
   async create(createTaskStatusDto: CreateTaskStatusDto): Promise<TaskStatus> {
-    // Check if status with same name already exists
     const existingStatuses = await this.taskStatusRepository.findAll();
     const duplicateName = existingStatuses.find(
       (status) => status.name === createTaskStatusDto.name,
@@ -58,7 +57,6 @@ export class TaskStatusesService {
       });
     }
 
-    // Check if new name conflicts with existing status
     if (updateTaskStatusDto.name) {
       const existingStatuses = await this.taskStatusRepository.findAll();
       const duplicateName = existingStatuses.find(

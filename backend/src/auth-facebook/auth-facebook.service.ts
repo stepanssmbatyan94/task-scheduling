@@ -7,9 +7,10 @@ import { AllConfigType } from '../config/config.type';
 
 @Injectable()
 export class AuthFacebookService {
-  // Base Facebook Graph API URL and API version
   private readonly baseUrl = 'https://graph.facebook.com';
   private readonly apiVersion = 'v23.0';
+  private static readonly PROFILE_TIMEOUT_MS = 10_000;
+  private static readonly TOKEN_VALIDATION_TIMEOUT_MS = 5_000;
 
   constructor(private configService: ConfigService<AllConfigType>) {}
 
@@ -23,10 +24,8 @@ export class AuthFacebookService {
     loginDto: AuthFacebookLoginDto,
   ): Promise<SocialInterface> {
     try {
-      // Step 1: Verify that the token is valid and belongs to our app
       await this.verifyAccessToken(loginDto.accessToken);
 
-      // Step 2: Construct the profile URL and query Facebook for user data
       const profileUrl = new URL(`${this.baseUrl}/${this.apiVersion}/me`);
       profileUrl.searchParams.set('fields', 'id,last_name,email,first_name');
       profileUrl.searchParams.set('access_token', loginDto.accessToken);
@@ -36,10 +35,9 @@ export class AuthFacebookService {
         headers: {
           Accept: 'application/json',
         },
-        signal: AbortSignal.timeout(10000), // Abort request if it exceeds 10 seconds
+        signal: AbortSignal.timeout(AuthFacebookService.PROFILE_TIMEOUT_MS),
       });
 
-      // Handle HTTP errors gracefully
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new HttpException(
@@ -50,7 +48,6 @@ export class AuthFacebookService {
 
       const data: FacebookInterface = await response.json();
 
-      // Ensure required fields are present in the response
       if (!data.id) {
         throw new HttpException(
           'Invalid Facebook profile data',
@@ -58,10 +55,9 @@ export class AuthFacebookService {
         );
       }
 
-      // Map Facebook data to our internal social user interface
       return {
         id: data.id,
-        email: data.email || undefined, // Email may not be present depending on user permissions
+        email: data.email ?? undefined,
         firstName: data.first_name || '',
         lastName: data.last_name || '',
       };
@@ -96,7 +92,6 @@ export class AuthFacebookService {
         infer: true,
       });
 
-      // Application credentials must be configured properly
       if (!appId || !appSecret) {
         throw new HttpException(
           'Facebook app credentials not configured',
@@ -115,7 +110,9 @@ export class AuthFacebookService {
         headers: {
           Accept: 'application/json',
         },
-        signal: AbortSignal.timeout(5000), // 5 second timeout for validation
+        signal: AbortSignal.timeout(
+          AuthFacebookService.TOKEN_VALIDATION_TIMEOUT_MS,
+        ),
       });
 
       if (!response.ok) {
@@ -128,7 +125,6 @@ export class AuthFacebookService {
       const result = await response.json();
       const tokenData = result.data;
 
-      // Check if the token is valid and active
       if (!tokenData.is_valid) {
         throw new HttpException(
           'Invalid Facebook access token',
@@ -136,7 +132,6 @@ export class AuthFacebookService {
         );
       }
 
-      // Check if the token belongs to our app (security measure)
       if (tokenData.app_id !== appId) {
         throw new HttpException(
           'Access token does not belong to this app',

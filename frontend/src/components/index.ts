@@ -1,7 +1,5 @@
-// global
 export { default as ThemeSwitcher } from './theme-switcher/ThemeSwitcher.vue';
 
-// UI
 export { default as Avatar } from './ui/Avatar.vue';
 export { default as Button } from './ui/Button.vue';
 export { default as Card } from './ui/Card.vue';
@@ -18,7 +16,6 @@ export { default as SectionTitle } from './ui/SectionTitle.vue';
 export { default as SplitButton } from './ui/SplitButton.vue';
 export { default as Tag } from './ui/Tag.vue';
 
-// shared
 export { default as AddNewButton } from './shared/action-button/AddNewButton.vue';
 export { default as CancelButton } from './shared/action-button/CancelButton.vue';
 export { default as EditButton } from './shared/action-button/EditButton.vue';
@@ -31,7 +28,6 @@ export { default as PageTitle } from './shared/PageTitle.vue';
 export { default as LocaleSwitcher } from './shared/LocaleSwitcher.vue';
 export { default as UserAvatar } from './shared/UserAvatar.vue';
 
-// vee-validate
 export { default as CheckboxField } from './vee-validate/CheckboxField.vue';
 export { default as CheckboxGroupField } from './vee-validate/CheckboxGroupField.vue';
 export { default as InputField } from './vee-validate/InputField.vue';

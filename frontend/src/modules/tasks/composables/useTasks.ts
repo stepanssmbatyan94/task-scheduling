@@ -39,9 +39,9 @@ const formatStatusName = (statusName: string): string => {
 const transformTaskToKanbanItem = (task: Task): KanbanItem => {
   return {
     id: task.id,
-    status: task.status.name, // Use status name directly as slug
+    status: task.status.name,
     title: task.title,
-    summary: task.title, // For compatibility
+    summary: task.title,
     description: task.description || undefined,
     assignedUser: task.assignedUser
       ? {
@@ -101,7 +101,7 @@ export function useTasks(options: { filters?: Ref<TaskFilters> } = {}) {
       ];
       return fetchTasksApi(params);
     },
-    staleTime: 30000,
+    staleTime: 30_000,
     refetchOnMount: 'always'
   });
 
@@ -322,7 +322,7 @@ export function useTasks(options: { filters?: Ref<TaskFilters> } = {}) {
     return taskStatuses.value
       .map((status) => ({
         name: formatStatusName(status.name),
-        slug: status.name // Use status name as slug
+        slug: status.name
       }))
       .sort((a, b) => {
         const statusA = taskStatuses.value.find((s) => s.name === a.slug);

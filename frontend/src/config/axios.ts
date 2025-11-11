@@ -27,10 +27,9 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Response Interceptor
 axiosInstance.interceptors.response.use(
   (response) => {
-    return response; // Return the response as-is
+    return response;
   },
   async (error) => {
     const originalRequestConfig = (error.config ?? {}) as InternalAxiosRequestConfig & {
