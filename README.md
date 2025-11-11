@@ -33,7 +33,7 @@ Task Scheduling is a two-part application for coordinating work across teams. It
 - The backend documentation folder contains detailed guides on architecture, authentication, database design, and operational tooling.
 
 ## Seed Accounts
-Running the backend seed (`npm run seed:run:relational`) provisions ready-to-use users:
+Running the backend seed (`npm run seed:run:relational`) provisions ready-to-use users (see the backend documentation index for deeper setup notes [backend/docs](backend/docs/readme.md)):
 
 - **Admin** – `admin@example.com` / `secret`  
   Full access to user management, task administration, and assignments.
