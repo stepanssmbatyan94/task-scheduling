@@ -7,15 +7,18 @@
     <section class="p-4 w-auto min-w-72">
       <section class="flex items-center">
         <h2 class="text-lg font-medium">
-          {{ user?.fullName }}
+          {{ fullName }}
         </h2>
-        <p v-if="user?.username" class="ml-2 text-sm">@{{ user?.username }}</p>
       </section>
 
       <section class="mt-2 flex flex-col gap-y-1">
         <p class="flex flex-row gap-x-6">
           <span class="w-20">{{ t('email') }}</span>
           <span>{{ user?.email ?? '-' }}</span>
+        </p>
+        <p class="flex flex-row gap-x-6">
+          <span class="w-20">{{ t('role.label') }}</span>
+          <span>{{ roleLabel }}</span>
         </p>
         <p class="flex flex-row gap-x-6">
           <span class="w-20">{{ t('status') }}</span>
@@ -38,9 +41,18 @@ type UserDetailsInfoProps = {
   user: User | undefined;
 };
 
-defineProps<UserDetailsInfoProps>();
+import { computed } from 'vue';
+
+const props = defineProps<UserDetailsInfoProps>();
 
 const { t } = useTranslation();
+
+const fullName = computed(() => {
+  const parts = [props.user?.firstName, props.user?.lastName].filter(Boolean);
+  return parts.length > 0 ? parts.join(' ') : t('user.label');
+});
+
+const roleLabel = computed(() => props.user?.role?.name ?? t('role.label'));
 </script>
 
 <style scoped></style>

@@ -4,10 +4,10 @@ export const AppRoute = {
   LOGIN: '/login',
   DASHBOARD: '/dashboard',
 
-  USER: '/user-management/users',
-  USER_CREATE: '/user-management/users/create',
-  USER_DETAILS: '/user-management/users/:id',
-  USER_EDIT: '/user-management/users/:id/edit',
+  USER: '/users',
+  USER_CREATE: '/users/create',
+  USER_DETAILS: '/users/:id',
+  USER_EDIT: '/users/:id/edit',
 
   ROLE: '/user-management/roles',
   ROLE_CREATE: '/user-management/roles/create',

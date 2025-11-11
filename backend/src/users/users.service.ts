@@ -37,12 +37,11 @@ export class UsersService {
       password = await bcrypt.hash(createUserDto.password, salt);
     }
 
-    let email: string | null = null;
-
     if (createUserDto.email) {
       const userObject = await this.usersRepository.findByEmail(
         createUserDto.email,
       );
+
       if (userObject) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
@@ -51,7 +50,6 @@ export class UsersService {
           },
         });
       }
-      email = createUserDto.email;
     }
 
     let photo: FileType | null | undefined = undefined;
@@ -118,7 +116,7 @@ export class UsersService {
       // <creating-property-payload />
       firstName: createUserDto.firstName,
       lastName: createUserDto.lastName,
-      email: email,
+      email: createUserDto.email,
       password: password,
       photo: photo,
       role: role,
@@ -176,10 +174,21 @@ export class UsersService {
     // Do not remove comment below.
     // <updating-property />
 
+    const numericId = +id;
+
+    if (Number.isNaN(numericId)) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          id: 'invalidUserId',
+        },
+      });
+    }
+
     let password: string | undefined = undefined;
 
     if (updateUserDto.password) {
-      const userObject = await this.usersRepository.findById(id);
+      const userObject = await this.usersRepository.findById(numericId);
 
       if (userObject && userObject?.password !== updateUserDto.password) {
         const salt = await bcrypt.genSalt();
@@ -194,7 +203,7 @@ export class UsersService {
         updateUserDto.email,
       );
 
-      if (userObject && userObject.id !== id) {
+      if (userObject && userObject.id !== numericId) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
           errors: {
@@ -204,8 +213,6 @@ export class UsersService {
       }
 
       email = updateUserDto.email;
-    } else if (updateUserDto.email === null) {
-      email = null;
     }
 
     let photo: FileType | null | undefined = undefined;
@@ -267,7 +274,7 @@ export class UsersService {
       } as Status;
     }
 
-    return this.usersRepository.update(id, {
+    return this.usersRepository.update(numericId, {
       // Do not remove comment below.
       // <updating-property-payload />
       firstName: updateUserDto.firstName,

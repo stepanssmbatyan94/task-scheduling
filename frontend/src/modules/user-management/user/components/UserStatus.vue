@@ -10,26 +10,33 @@ import { useTranslation } from '@/composables';
 import type { TagProps } from '@/types';
 
 type UserStatusProps = {
-  status: string | undefined;
+  status?: {
+    id: number | string;
+    name?: string | null;
+  } | null;
 };
 
-const { status } = defineProps<UserStatusProps>();
+const props = defineProps<UserStatusProps>();
 const { t } = useTranslation();
 
+const normalizedStatus = computed(() =>
+  props.status?.name?.toString().toLowerCase() ?? ''
+);
+
 const userStatus = computed<Record<string, TagProps>>(() => ({
-  ACTIVE: {
+  active: {
     label: t('active'),
     icon: 'pi pi-check',
     severity: 'success'
   },
-  DEACTIVATED: {
+  inactive: {
     label: t('deactivated'),
     icon: 'pi pi-times',
     severity: 'danger'
   }
 }));
 
-const state = computed(() => userStatus.value[status ?? '']);
+const state = computed(() => userStatus.value[normalizedStatus.value]);
 </script>
 
 <style scoped></style>

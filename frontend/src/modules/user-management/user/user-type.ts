@@ -1,52 +1,39 @@
-import type { Role } from '../role/role-type';
+export type UserRole = {
+  id: number | string;
+  name?: string | null;
+};
+
+export type UserStatus = {
+  id: number | string;
+  name?: string | null;
+};
 
 export type User = {
-  recordState: string;
-  version: number;
-  createdBy: string;
-  updatedBy: string;
+  id: number;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  role?: UserRole | null;
+  status?: UserStatus | null;
   createdAt: string;
   updatedAt: string;
-  id: number;
-  username: string;
+};
+
+export type CreateUserForm = {
   firstName: string;
   lastName: string;
-  firstNameKh: string;
-  lastNameKh: string;
-  fullName: string;
-  fullNameKh: string;
-  phoneNumber: string;
   email: string;
-  profileImageUrl: string;
-  status: string;
-  branch: Branch;
-  departmentId: string;
-  positionId: string;
-  roles: Role[];
-};
-
-type UserForm = {
-  firstNameKh?: string;
-  lastNameKh?: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  phoneNumber?: string;
-  email?: string;
-  branchCode: string;
-  roleIds: number[];
-};
-
-export type CreateUserForm = UserForm & {
   password: string;
   confirmPassword: string;
+  roleId: number | string;
+  statusId?: number | string | null;
 };
 
-export type EditUserForm = UserForm;
-
-export type Branch = {
-  id: number;
-  code: string;
-  nameEn: string;
-  nameKh: string;
+export type EditUserForm = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password?: string;
+  roleId: number | string;
+  statusId?: number | string | null;
 };

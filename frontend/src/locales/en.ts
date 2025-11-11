@@ -44,6 +44,7 @@ export default {
   create: 'Create',
   view: 'View',
   edit: 'Edit',
+  delete: 'Delete',
   details: 'Details',
   active: 'Active',
   deactivated: 'Deactivated',
@@ -71,7 +72,9 @@ export default {
     list: 'Users',
     category: 'Category',
     addNew: 'Add New User',
-    edit: 'Edit User'
+    edit: 'Edit User',
+    details: 'User Details',
+    confirmDelete: 'Are you sure you want to delete this user?'
   },
 
   role: {
@@ -83,7 +86,11 @@ export default {
     nameKh: 'Role Name (Khmer)',
     roleType: 'Role Type',
     addNew: 'Add New Role',
-    edit: 'Edit Role'
+    edit: 'Edit Role',
+    options: {
+      admin: 'Admin',
+      user: 'User'
+    }
   },
 
   branch: {
@@ -164,7 +171,8 @@ export default {
   },
   errors: {
     generic: 'Something went wrong. Please try again.',
-    userHasOverlappingTask: 'This user already has a task scheduled during this period.'
+    userHasOverlappingTask: 'This user already has a task scheduled during this period.',
+    emailAlreadyExists: 'A user with this e-mail already exists.'
   },
   validation: {
     required: '{field} is required.',

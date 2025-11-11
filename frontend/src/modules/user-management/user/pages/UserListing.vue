@@ -8,15 +8,19 @@
 
   <PageContent>
     <Card>
-      <DataTable :loading="isLoading" :data-source="data" :columns>
+      <DataTable :loading="isLoading" :data-source="formattedUsers" :columns>
         <template #fullName="{ row: user }">
-          <div class="flex items-center">
+          <div class="flex items-center gap-3">
             <UserAvatar />
             <div class="flex flex-col">
               <span class="font-medium">{{ user.fullName }}</span>
-              <span class="text-xs">@{{ user.username }}</span>
+              <span class="text-xs text-gray-500">{{ user.email ?? t('tasks.unassigned') }}</span>
             </div>
           </div>
+        </template>
+
+        <template #role="{ row: user }">
+          {{ user.roleName }}
         </template>
 
         <template #status="{ row: user }">
@@ -70,33 +74,31 @@ import { useUsersQuery } from '../composables/useUserQuery';
 import { userQueryKeys } from '../query-keys';
 import type { User } from '../user-type';
 
+type TableUser = User & {
+  fullName: string;
+  roleName: string;
+};
+
 const queryClient = useQueryClient();
 const { t } = useTranslation();
 const { hasPermission } = useAuth();
 
 const breadcrumbItems = computed<BreadcrumbItemProps[]>(() => [
   {
-    title: t('userManagement')
+    title: t('user.list')
   }
 ]);
 
-const columns = computed<ColumnProps<User>[]>(() => [
+const columns = computed<ColumnProps<TableUser>[]>(() => [
   {
     key: 'fullName',
     title: t('fullName'),
-    minWidth: 150
+    minWidth: 200
   },
   {
-    title: t('email'),
-    dataIndex: 'email',
-    displayDashIfValueIsNull: true,
-    minWidth: 150
-  },
-  {
-    title: t('phoneNumber'),
-    dataIndex: 'phoneNumber',
-    displayDashIfValueIsNull: true,
-    minWidth: 150
+    key: 'role',
+    title: t('role.label'),
+    minWidth: 140
   },
   {
     key: 'status',
@@ -105,12 +107,23 @@ const columns = computed<ColumnProps<User>[]>(() => [
   },
   {
     key: 'actions',
-    title: '',
-    minWidth: 80
+    title: t('actions'),
+    minWidth: 140
   }
 ]);
 
 const { data, isLoading } = useUsersQuery();
+
+const formattedUsers = computed<TableUser[]>(() => {
+  return (data.value ?? []).map((user) => {
+    const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
+    return {
+      ...user,
+      fullName: fullName || user.email || t('user.label'),
+      roleName: user.role?.name ?? t('role.label')
+    };
+  });
+});
 
 onUnmounted(() => {
   queryClient.cancelQueries({ queryKey: userQueryKeys.users });

@@ -1,34 +1,32 @@
-import { env } from '@/config/env';
-import { mockReponse } from '@/mock-response-data';
 import { Http } from '@/services/Http';
-import type { CreateUserForm, EditUserForm, User } from './user-type';
+import type { User } from './user-type';
 
 const API_ENDPOINT = 'users';
 
-export async function fetchUsersApi(signal: AbortSignal) {
-  if (env.MOCK_API == 'true') {
-    // TODO: remove this once you have auth
-    return mockReponse.getUsers as any;
-  }
+export async function fetchUsersApi(signal?: AbortSignal) {
+  return Http.get<{ data: User[]; hasNextPage: boolean }>(
+    API_ENDPOINT,
+    { limit: -1 },
+    {
+      signal
+    }
+  );
+}
 
-  return await Http.get<SuccessResponse<User[]>>(API_ENDPOINT, undefined, {
+export async function fetchUserByIdApi(id: string | number, signal?: AbortSignal) {
+  return Http.get<User>(`${API_ENDPOINT}/${id}`, undefined, {
     signal
   });
 }
 
-export async function fetchUserByIdApi(id: string, signal: AbortSignal) {
-  if (env.MOCK_API == 'true') {
-    // TODO: remove this once you have auth
-    return mockReponse.getUserById as any;
-  }
-
-  return await Http.get<SuccessResponse<User>>(`${API_ENDPOINT}/${id}`, undefined, { signal });
+export async function createUserApi(payload: unknown) {
+  return Http.post<User>(API_ENDPOINT, payload);
 }
 
-export async function createUserApi(values: CreateUserForm) {
-  return await Http.post<SuccessResponse<User>>(`${API_ENDPOINT}`, values);
+export async function updateUserApi(id: string | number, payload: unknown) {
+  return Http.patch<User>(`${API_ENDPOINT}/${id}`, payload);
 }
 
-export async function updateUserApi(values: EditUserForm, id: string) {
-  return await Http.put<SuccessResponse<User>>(`${API_ENDPOINT}/${id}`, values);
+export async function deleteUserApi(id: string | number) {
+  return Http.delete<void>(`${API_ENDPOINT}/${id}`);
 }

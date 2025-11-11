@@ -7,46 +7,48 @@
       <PageContentSection :title="t('personalInfo')">
         <Row>
           <Col :md="12">
-            <InputField required name="lastName" :label="t('lastName')" />
-          </Col>
-          <Col :md="12">
             <InputField required name="firstName" :label="t('firstName')" />
           </Col>
           <Col :md="12">
-            <InputField name="lastNameKh" :label="t('lastNameKh')" />
+            <InputField required name="lastName" :label="t('lastName')" />
           </Col>
           <Col :md="12">
-            <InputField name="firstNameKh" :label="t('firstNameKh')" />
-          </Col>
-          <Col :md="12">
-            <InputField name="phoneNumber" :label="t('phoneNumber')" />
-          </Col>
-          <Col :md="12">
-            <InputField name="email" :label="t('email')" />
+            <InputField required name="email" :label="t('email')" />
           </Col>
         </Row>
       </PageContentSection>
 
       <PageContentSection :title="t('additionalInfo')">
         <Row>
-          <Col :md="8">
-            <BranchAutocomplete required name="branchCode" @change="onBranchChange" />
+          <Col :md="12">
+            <SelectField
+              required
+              name="roleId"
+              :label="t('role.label')"
+              :options="roleOptions"
+              option-label="label"
+              option-value="value"
+            />
           </Col>
-          <Col :md="8">
-            <RoleAutocomplete required name="roleIds" :branch-code="values.branchCode" />
+          <Col :md="12">
+            <SelectField
+              name="statusId"
+              :label="t('status')"
+              :options="statusOptions"
+              option-label="label"
+              option-value="value"
+              show-clear
+            />
           </Col>
         </Row>
       </PageContentSection>
 
       <PageContentSection :title="t('loginInfo')">
         <Row>
-          <Col :md="8">
-            <InputField required name="username" :label="t('username')" />
-          </Col>
-          <Col :md="8">
+          <Col :md="12">
             <PasswordField required name="password" :label="t('password')" />
           </Col>
-          <Col :md="8">
+          <Col :md="12">
             <PasswordField required name="confirmPassword" :label="t('confirmPassword')" />
           </Col>
         </Row>
@@ -69,6 +71,7 @@ import {
   Col,
   Form,
   InputField,
+  SelectField,
   PageBreadcrumb,
   PageContent,
   PageContentSection,
@@ -79,9 +82,7 @@ import {
 } from '@/components';
 import { useFormAsync, useTranslation } from '@/composables';
 import { AppRoute } from '@/constants';
-import BranchAutocomplete from '@/modules/branch/components/BranchAutocomplete.vue';
 import type { BreadcrumbItemProps } from '@/types';
-import RoleAutocomplete from '../../role/components/RoleAutocomplete.vue';
 import { useCreateUserMutation } from '../composables/useUserQuery';
 import { createUserValidationSchema } from '../user-schema';
 import type { CreateUserForm } from '../user-type';
@@ -89,9 +90,6 @@ import type { CreateUserForm } from '../user-type';
 const { t } = useTranslation();
 
 const breadcrumbItems = computed<BreadcrumbItemProps[]>(() => [
-  {
-    title: t('userManagement')
-  },
   {
     title: t('user.list'),
     to: AppRoute.USER
@@ -101,19 +99,25 @@ const breadcrumbItems = computed<BreadcrumbItemProps[]>(() => [
   }
 ]);
 
-const { handleSubmit, values, setFieldValue } = useFormAsync<CreateUserForm>({
+const { handleSubmit } = useFormAsync<CreateUserForm>({
   validationSchema: toTypedSchema(createUserValidationSchema)
 });
 
 const { isPending, mutate } = useCreateUserMutation();
 
-const onSubmit = handleSubmit((values) => {
-  mutate(values);
-});
+const roleOptions = computed(() => [
+  { label: t('role.options.admin'), value: 1 },
+  { label: t('role.options.user'), value: 2 }
+]);
 
-function onBranchChange() {
-  setFieldValue('roleIds', [], false);
-}
+const statusOptions = computed(() => [
+  { label: t('active'), value: 1 },
+  { label: t('deactivated'), value: 2 }
+]);
+
+const onSubmit = handleSubmit((formValues) => {
+  mutate(formValues);
+});
 </script>
 
 <style scoped></style>

@@ -1,7 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router';
 
 import { AppRoute } from '@/constants';
-import { userManagementRoutes } from '@/modules/user-management/router';
+import { userRoutes } from '@/modules/user-management/router';
 import { taskRoutes } from '@/modules/tasks/routes';
 
 export const privateRoutes: RouteRecordRaw[] = [
@@ -16,7 +16,7 @@ export const privateRoutes: RouteRecordRaw[] = [
         alias: ['/'],
         meta: { requiresAuth: true }
       },
-      ...userManagementRoutes,
+      ...userRoutes,
       ...taskRoutes
     ]
   }

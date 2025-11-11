@@ -1,43 +1,37 @@
 import { z } from 'zod';
 
+const idSchema = z.union([z.string(), z.number()]).refine(
+  (value) => {
+    const numeric = Number(value);
+    return !Number.isNaN(numeric) && numeric > 0;
+  },
+  { message: 'Invalid selection.' }
+);
+
 export const createUserValidationSchema = z
   .object({
-    lastNameKh: z.string().max(50).optional().or(z.literal('')).nullable(),
-    firstNameKh: z.string().max(50).optional().or(z.literal('')).nullable(),
-    lastName: z.string({ message: 'Last name is required.' }).max(35, {
-      message: 'Last name must be no more than 35 characters long.'
-    }),
-    firstName: z.string({ message: 'First name is required.' }).max(35, {
-      message: 'First name must be no more than 35 characters long.'
-    }),
-    phoneNumber: z.string().min(9).max(15).optional().or(z.literal('')).nullable(),
-    email: z.string().email().max(50).optional().or(z.literal('')).nullable(),
-    branchCode: z.string({ message: 'Branch is required.' }),
-    roleIds: z.array(z.number()).min(1, { message: 'At least one role is required.' }),
-    username: z
-      .string({ message: 'Username is required.' })
-      .min(4, { message: 'Username must be at least 4 characters long.' })
-      .max(35, { message: 'Username must be no more than 35 characters long.' })
-      .refine((value) => !value.includes(' '), {
-        message: 'Username cannot contain spaces.'
-      })
-      .refine((value) => /^[a-zA-Z0-9.]+$/.test(value), {
-        message: 'Username can only contain letters, numbers, and dots.'
-      }),
+    firstName: z
+      .string({ message: 'First name is required.' })
+      .min(1, { message: 'First name is required.' })
+      .max(50, { message: 'First name must be no more than 50 characters long.' }),
+    lastName: z
+      .string({ message: 'Last name is required.' })
+      .min(1, { message: 'Last name is required.' })
+      .max(50, { message: 'Last name must be no more than 50 characters long.' }),
+    email: z
+      .string({ message: 'E-mail is required.' })
+      .email({ message: 'Please provide a valid e-mail address.' })
+      .max(100, { message: 'E-mail must be no more than 100 characters long.' }),
     password: z
       .string({ message: 'Password is required.' })
-      .min(8, 'Password must be at least 8 characters long.')
-      .max(50, 'Password must be no more than 50 characters long.')
-      .regex(/[a-zA-Z]/, 'Password must contain at least one letter.')
-      .regex(/\d/, 'Password must contain at least one number.')
-      .trim(),
+      .min(6, { message: 'Password must be at least 6 characters long.' })
+      .max(50, { message: 'Password must be no more than 50 characters long.' }),
     confirmPassword: z
       .string({ message: 'Confirm password is required.' })
-      .min(8, 'Confirm password must be at least 8 characters long.')
-      .max(50, 'Confirm password must be no more than 50 characters long.')
-      .regex(/[a-zA-Z]/, 'Confirm password must contain at least one letter.')
-      .regex(/\d/, 'Confirm password must contain at least one number.')
-      .trim()
+      .min(6, { message: 'Confirm password must be at least 6 characters long.' })
+      .max(50, { message: 'Confirm password must be no more than 50 characters long.' }),
+    roleId: idSchema,
+    statusId: idSchema.nullish()
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords don\'t match.',
@@ -45,26 +39,24 @@ export const createUserValidationSchema = z
   });
 
 export const updateUserValidationSchema = z.object({
-  lastNameKh: z.string().max(50).optional().or(z.literal('')).nullable(),
-  firstNameKh: z.string().max(50).optional().or(z.literal('')).nullable(),
+  firstName: z
+    .string({ message: 'First name is required.' })
+    .min(1, { message: 'First name is required.' })
+    .max(50, { message: 'First name must be no more than 50 characters long.' }),
   lastName: z
     .string({ message: 'Last name is required.' })
-    .max(35, { message: 'Last name must be no more than 35 characters long.' }),
-  firstName: z.string({ message: 'First name is required.' }).max(35, {
-    message: 'First name must be no more than 35 characters long.'
-  }),
-  phoneNumber: z.string().min(9).max(15).optional().or(z.literal('')).nullable(),
-  email: z.string().email().max(50).optional().or(z.literal('')).nullable(),
-  branchCode: z.string({ message: 'Branch is required.' }),
-  roleIds: z.array(z.number()).min(1, { message: 'At least one role is required.' }),
-  username: z
-    .string({ message: 'Username is required.' })
-    .min(4, { message: 'Username must be at least 4 characters long.' })
-    .max(35, { message: 'Username must be no more than 35 characters long.' })
-    .refine((value) => !value.includes(' '), {
-      message: 'Username cannot contain spaces.'
-    })
-    .refine((value) => /^[a-zA-Z0-9.]+$/.test(value), {
-      message: 'Username can only contain letters, numbers, and dots.'
-    })
+    .min(1, { message: 'Last name is required.' })
+    .max(50, { message: 'Last name must be no more than 50 characters long.' }),
+  email: z
+    .string({ message: 'E-mail is required.' })
+    .email({ message: 'Please provide a valid e-mail address.' })
+    .max(100, { message: 'E-mail must be no more than 100 characters long.' }),
+  password: z
+    .string()
+    .max(50, { message: 'Password must be no more than 50 characters long.' })
+    .optional()
+    .or(z.literal(''))
+    .transform((value) => (value === '' ? undefined : value)),
+  roleId: idSchema,
+  statusId: idSchema.nullish()
 });

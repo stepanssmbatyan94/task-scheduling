@@ -1,8 +1,17 @@
 <template>
   <PageBreadcrumb :items="breadcrumbItems" />
-  <PageTitle :name="data?.fullName">
+  <PageTitle :name="pageTitle">
     <template v-if="hasPermission(Permission.EDIT_USER)" #actionButton>
-      <EditButton :path="`./${data?.id}/edit`" :label="t('user.edit')" />
+      <div class="flex gap-2">
+        <EditButton :path="editPath" :label="t('user.edit')" />
+        <Button
+          severity="danger"
+          icon="pi pi-trash"
+          :label="t('delete')"
+          :loading="isDeleting"
+          @click="handleDelete"
+        />
+      </div>
     </template>
   </PageTitle>
 
@@ -16,10 +25,6 @@
         </template>
       </Descriptions>
     </PageContentSection>
-
-    <PageContentSection :title="t('loginInfo')">
-      <Descriptions :fields="[{ label: t('username'), value: data?.username }]" />
-    </PageContentSection>
   </PageContent>
 </template>
 
@@ -29,6 +34,7 @@ import { computed, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 import {
+  Button,
   Descriptions,
   EditButton,
   PageBreadcrumb,
@@ -42,7 +48,7 @@ import { useAuth } from '@/modules/auth/useAuth';
 import type { BreadcrumbItemProps, DescriptionsFieldProps } from '@/types';
 import UserDetailsInfo from '../components/UserDetailsInfo.vue';
 import UserStatus from '../components/UserStatus.vue';
-import { useUserQuery } from '../composables/useUserQuery';
+import { useDeleteUserMutation, useUserQuery } from '../composables/useUserQuery';
 import { userQueryKeys } from '../query-keys';
 
 const queryClient = useQueryClient();
@@ -52,9 +58,6 @@ const { hasPermission } = useAuth();
 
 const breadcrumbItems = computed<BreadcrumbItemProps[]>(() => [
   {
-    title: t('userManagement')
-  },
-  {
     title: t('user.list'),
     to: AppRoute.USER
   },
@@ -63,7 +66,18 @@ const breadcrumbItems = computed<BreadcrumbItemProps[]>(() => [
   }
 ]);
 
-const { data } = useUserQuery(params.id as string);
+const userId = params.id as string;
+
+const { data } = useUserQuery(userId);
+const { mutate: deleteUser, isPending: isDeleting } = useDeleteUserMutation(userId);
+
+const editPath = computed(() => {
+  const user = data.value;
+  if (!user) {
+    return '';
+  }
+  return AppRoute.USER_EDIT.replace(':id', String(user.id));
+});
 
 const fields = computed((): DescriptionsFieldProps[] => {
   const user = data.value;
@@ -77,28 +91,32 @@ const fields = computed((): DescriptionsFieldProps[] => {
       fields: [
         {
           label: t('fullName'),
-          value: user.fullName
-        },
-        {
-          label: t('fullNameKh'),
-          value: user.fullNameKh
-        },
-        {
-          label: t('username'),
-          value: user.username
+          value: [user.firstName, user.lastName].filter(Boolean).join(' ') || '-'
         },
         {
           label: t('email'),
-          value: user.email
+          value: user.email ?? '-'
+        },
+        {
+          label: t('role.label'),
+          value: user.role?.name ?? t('role.label')
         },
         {
           slotName: 'status',
           label: t('status')
-          // value: user.status
         }
       ]
     }
   ];
+});
+
+const pageTitle = computed(() => {
+  const user = data.value;
+  if (!user) {
+    return t('user.details');
+  }
+  const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
+  return fullName || user.email || t('user.details');
 });
 
 onUnmounted(() => {
@@ -106,6 +124,19 @@ onUnmounted(() => {
     queryKey: userQueryKeys.user(params.id as string)
   });
 });
+
+const handleDelete = () => {
+  if (!data.value) {
+    return;
+  }
+
+  const confirmed = window.confirm(t('user.confirmDelete'));
+  if (!confirmed) {
+    return;
+  }
+
+  deleteUser();
+};
 </script>
 
 <style scoped></style>

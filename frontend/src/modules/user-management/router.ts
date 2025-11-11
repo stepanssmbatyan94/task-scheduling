@@ -1,7 +1,7 @@
 import { AppRoute, Permission } from '@/constants';
 import type { RouteRecordRaw } from 'vue-router';
 
-export const userManagementRoutes: RouteRecordRaw[] = [
+export const userRoutes: RouteRecordRaw[] = [
   {
     path: AppRoute.USER,
     name: AppRoute.USER,
@@ -36,42 +36,6 @@ export const userManagementRoutes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       authorities: [Permission.EDIT_USER]
-    }
-  },
-  {
-    path: AppRoute.ROLE,
-    name: AppRoute.ROLE,
-    component: () => import('@/modules/user-management/role/pages/RoleListing.vue'),
-    meta: {
-      requiresAuth: true,
-      authorities: [Permission.VIEW_ROLE_LISTING]
-    }
-  },
-  {
-    path: AppRoute.ROLE_CREATE,
-    name: AppRoute.ROLE_CREATE,
-    component: () => import('@/modules/user-management/role/pages/RoleCreate.vue'),
-    meta: {
-      requiresAuth: true,
-      authorities: [Permission.CREATE_ROLE]
-    }
-  },
-  {
-    path: AppRoute.ROLE_DETAILS,
-    name: AppRoute.ROLE_DETAILS,
-    component: () => import('@/modules/user-management/role/pages/RoleDetails.vue'),
-    meta: {
-      requiresAuth: true,
-      authorities: [Permission.VIEW_ROLE_DETAILS]
-    }
-  },
-  {
-    path: AppRoute.ROLE_EDIT,
-    name: AppRoute.ROLE_EDIT,
-    component: () => import('@/modules/user-management/role/pages/RoleEdit.vue'),
-    meta: {
-      requiresAuth: true,
-      authorities: [Permission.EDIT_ROLE]
     }
   }
 ];
