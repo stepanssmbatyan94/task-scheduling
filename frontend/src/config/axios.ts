@@ -27,6 +27,8 @@ axiosInstance.interceptors.request.use(
   }
 );
 
+let refreshRequest: Promise<boolean> | null = null;
+
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;
@@ -36,11 +38,25 @@ axiosInstance.interceptors.response.use(
       _retry?: boolean;
     };
     const status = error?.response?.status;
+    const requestUrl = originalRequestConfig?.url ?? '';
+    const isRefreshRequest = requestUrl.includes('auth/refresh');
 
-    if (status === 401 && getRefreshToken() && !originalRequestConfig._retry) {
+    if (
+      status === 401 &&
+      getRefreshToken() &&
+      !originalRequestConfig._retry &&
+      !isRefreshRequest
+    ) {
       originalRequestConfig._retry = true;
 
-      const didRefresh = await refreshToken();
+      refreshRequest = refreshRequest ?? refreshToken();
+      let didRefresh = false;
+
+      try {
+        didRefresh = await refreshRequest;
+      } finally {
+        refreshRequest = null;
+      }
 
       if (didRefresh) {
         originalRequestConfig.headers = originalRequestConfig.headers ?? {};

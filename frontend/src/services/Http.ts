@@ -19,7 +19,7 @@ export class Http {
     const axiosError = error as AxiosErrorLike | undefined;
 
     if (axiosError?.code === 'ERR_CANCELED') {
-      console.log('Request aborted:', axiosError.message ?? 'unknown reason');
+      console.error('Request aborted:', axiosError.message ?? 'unknown reason');
       return;
     }
 
