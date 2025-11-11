@@ -5,10 +5,8 @@
 ## Table of Contents <!-- omit in toc -->
 
 - [Hexagonal Architecture](#hexagonal-architecture)
-- [Motivation](#motivation)
-- [Description of the module structure](#description-of-the-module-structure)
-- [Recommendations](#recommendations)
-  - [Repository](#repository)
+- [Module layout](#module-layout)
+- [Working with repositories](#working-with-repositories)
 - [FAQ](#faq)
   - [Is there a way to generate a new resource (controller, service, DTOs, etc) with Hexagonal Architecture?](#is-there-a-way-to-generate-a-new-resource-controller-service-dtos-etc-with-hexagonal-architecture)
 - [Links](#links)
@@ -17,15 +15,19 @@
 
 ## Hexagonal Architecture
 
-NestJS Boilerplate is based on [Hexagonal Architecture](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)). This architecture is also known as Ports and Adapters.
+The service follows [Hexagonal Architecture](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)) to keep business logic, persistence, and delivery concerns isolated. Controllers expose REST/websocket ports, services encapsulate domain rules (e.g., scheduling constraints, role checks), and adapters connect to infrastructure pieces such as TypeORM repositories, mailers, and file storage.
 
-![Hexagonal Architecture Diagram](https://github.com/brocoders/nestjs-boilerplate/assets/6001723/6a6a763e-d1c9-43cc-910a-617cda3a71db)
+## Module layout
 
-## Motivation
+Each feature in `src/` is organised by module (`tasks`, `users`, `statuses`, `session`, etc.) and follows a consistent structure:
 
-The main reason for using Hexagonal Architecture is to separate the business logic from the infrastructure. This separation allows us to easily change the database, the way of uploading files, or any other infrastructure without changing the business logic.
-
-## Description of the module structure
+Core modules:
+- `auth`, `auth-apple`, `auth-facebook`, `auth-google` – authentication providers and refresh/session logic.
+- `tasks` – task CRUD, Kanban board socket gateway, assignment operations.
+- `statuses` – canonical task workflow statuses.
+- `users`, `roles`, `session` – account management, authorization, and session persistence.
+- `files`, `mail`, `mailer` – infrastructure adapters for storage and email delivery.
+- `i18n` – locale resources for transactional emails and server responses.
 
 ```txt
 .
@@ -51,25 +53,16 @@ The main reason for using Hexagonal Architecture is to separate the business log
 └── service.ts
 ```
 
-`[DOMAIN ENTITY].ts` represents an entity used in the business logic. Domain entity has no dependencies on the database or any other infrastructure.
+Key points:
 
-`[ENTITY].ts` represents the **database structure**. It is used in the relational database (MySQL).
+- `domain/` captures the business entity or aggregate used by services and gateways.
+- `infrastructure/persistence` implements repository adapters (relational by default). Each adapter maps between database entities and domain objects.
+- Controllers live at the module root and orchestrate DTO validation, guards, and service calls.
+- `tasks/gateways` hosts the Socket.IO gateway that streams task updates to the frontend board.
 
-`[MAPPER].ts` is a mapper that converts **database entity** to **domain entity** and vice versa.
+## Working with repositories
 
-`[PORT].repository.ts` is a repository **port** that defines the methods for interacting with the database.
-
-`[ADAPTER].repository.ts` is a repository that implements the `[PORT].repository.ts`. It is used to interact with the database.
-
-`infrastructure` folder - contains all the infrastructure-related components such as `persistence`, `uploader`, `senders`, etc.
-
-Each component has `port` and `adapters`. `Port` is interface that define the methods for interacting with the infrastructure. `Adapters` are implementations of the `port`.
-
-## Recommendations
-
-### Repository
-
-Don't try to create universal methods in the repository because they are difficult to extend during the project's life. Instead of this create methods with a single responsibility.
+Prefer explicit repository methods over generic arguments so the intent stays clear and adapters remain easy to evolve. For example:
 
 ```typescript
 // ❌
@@ -101,13 +94,13 @@ export class UsersRelationalRepository implements UserRepository {
 
 ### Is there a way to generate a new resource (controller, service, DTOs, etc) with Hexagonal Architecture?
 
-Yes, you can use the [CLI](cli.md) to generate a new resource with Hexagonal Architecture.
+Yes. Use the hygen-based scripts described in the [CLI guide](cli.md) to scaffold relational resources that follow this structure.
 
 ---
 
 ## Links
 
-- [Dependency Inversion Principle](https://trilon.io/blog/dependency-inversion-principle) with NestJS.
+- [Dependency Inversion Principle](https://trilon.io/blog/dependency-inversion-principle) with NestJS
 
 ---
 

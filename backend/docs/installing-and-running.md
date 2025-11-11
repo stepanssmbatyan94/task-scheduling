@@ -1,6 +1,6 @@
-# Installation
+# Installation & Local Run
 
-NestJS Boilerplate uses [TypeORM](https://www.npmjs.com/package/typeorm) with [MySQL](https://www.mysql.com/) out of the box. You can point it to a different relational database if required, but all shipped tooling assumes MySQL.
+The Task Scheduling API relies on [MySQL](https://www.mysql.com/) via [TypeORM](https://typeorm.io/) and ships with scripts for migrations, seeds, and Docker-based infrastructure. You can target any TypeORM-supported relational database by adjusting the environment variables, but examples below assume MySQL.
 
 ---
 
@@ -13,107 +13,84 @@ NestJS Boilerplate uses [TypeORM](https://www.npmjs.com/package/typeorm) with [M
 
 ---
 
-## Comfortable development (MySQL + TypeORM)
+## Recommended development flow
 
-1. Clone repository
-
-   ```bash
-   git clone --depth 1 https://github.com/brocoders/nestjs-boilerplate.git my-app
-   ```
-
-1. Go to folder, and copy `env-example` as `.env`.
-
-   ```bash
-   cd my-app/
-   cp env-example .env
-   ```
-
-1. Update the `.env` file if you plan to run MySQL locally. For Docker-based development keep `DATABASE_HOST=mysql`. For direct local usage change it to `localhost`.
-
-1. Start the infrastructure containers:
-
-   ```bash
-   docker compose up -d mysql adminer maildev
-   ```
-
-1. Install project dependencies:
-
+1. **Install dependencies**
    ```bash
    npm install
+   # or
+   yarn install
    ```
 
-1. Run the one-time app configuration (skip on subsequent runs):
+2. **Create a `.env` file** (see [backend README](../README.md) for required keys). Minimum configuration:
+   ```env
+   APP_PORT=3000
+   API_PREFIX=api
+   BACKEND_DOMAIN=http://localhost:3000
+   FRONTEND_DOMAIN=http://localhost:5173
 
-   ```bash
-   npm run app:config
+   DATABASE_TYPE=mysql
+   DATABASE_HOST=localhost
+   DATABASE_PORT=3306
+   DATABASE_NAME=task_scheduling
+   DATABASE_USERNAME=root
+   DATABASE_PASSWORD=secret
+   DATABASE_ROOT_PASSWORD=secret
+
+   AUTH_JWT_SECRET=...
+   AUTH_JWT_TOKEN_EXPIRES_IN=15m
+   AUTH_REFRESH_SECRET=...
+   AUTH_REFRESH_TOKEN_EXPIRES_IN=7d
+
+   MAIL_HOST=localhost
+   MAIL_PORT=1025
+   MAIL_CLIENT_PORT=1080
+   MAIL_DEFAULT_EMAIL=no-reply@taskscheduling.local
+   MAIL_DEFAULT_NAME=Task Scheduling
+   MAIL_IGNORE_TLS=true
+   MAIL_SECURE=false
+   MAIL_REQUIRE_TLS=false
    ```
 
-1. Run migrations:
+3. **Start required services**
+   - Local MySQL + Maildev (Adminer optional but helpful):
+     ```bash
+     docker compose up -d mysql maildev adminer
+     ```
+   - Or point `DATABASE_HOST` to an existing database.
 
+4. **Run migrations and seed data**
    ```bash
    npm run migration:run
-   ```
-
-1. Seed baseline data:
-
-   ```bash
    npm run seed:run:relational
    ```
 
-1. Start the app in development mode:
-
+5. **Start the API**
    ```bash
    npm run start:dev
    ```
-
-1. Open <http://localhost:3000>
-
-### Video guideline
-
-<https://github.com/user-attachments/assets/136a16aa-f94a-4b20-8eaf-6b4262964315>
-
-> The video demonstrates the general bootstrap process. Swap the database-specific steps with the MySQL commands outlined above.
+   Swagger is available at <http://localhost:3000/docs>.
 
 ---
 
-## Quick run (MySQL + TypeORM)
+## Quick start with Docker Compose
 
-If you want a quick start, you can use the following commands:
+For an all-in-one local stack (API + MySQL + Maildev):
 
-1. Clone repository
+```bash
+docker compose up -d
+docker compose logs -f api  # optional watch
+```
 
-   ```bash
-   git clone --depth 1 https://github.com/brocoders/nestjs-boilerplate.git my-app
-   ```
-
-1. Go to folder, and copy `env-example` as `.env`.
-
-   ```bash
-   cd my-app/
-   cp env-example .env
-   ```
-
-1. Run containers
-
-   ```bash
-   docker compose up -d
-   ```
-
-1. Check container logs (optional)
-
-   ```bash
-   docker compose logs
-   ```
-
-1. Open <http://localhost:3000>
+Ensure your `.env` matches the compose defaults (`DATABASE_HOST=mysql`, `MAIL_HOST=maildev`). The API will hot-reload when source files change if the compose profile mounts the project directory.
 
 ---
 
-## Links
+## Useful URLs
 
-- Swagger (API docs): <http://localhost:3000/docs>
-- Adminer (client for DB): <http://localhost:8080>
-- Maildev: <http://localhost:1080>
+- Swagger UI: <http://localhost:3000/docs>
+- Maildev inbox: <http://localhost:1080>
+- Adminer (optional DB UI): <http://localhost:8080>
 
 ---
 

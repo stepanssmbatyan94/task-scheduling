@@ -1,6 +1,6 @@
 # Automatic update of dependencies
 
-If you want to automatically update dependencies, you can connect [Renovate](https://github.com/marketplace/renovate) for your project.
+This repository includes a `renovate.json` configuration. Connect [Renovate](https://github.com/marketplace/renovate) to keep backend dependencies current, or adapt the config to your workflow (e.g., GitHub Actions or self-hosted Renovate runners).
 
 ---
 

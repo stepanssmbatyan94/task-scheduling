@@ -11,6 +11,158 @@
 - [Auth via Google](#auth-via-google)
 - [About JWT strategy](#about-jwt-strategy)
 - [Refresh token flow](#refresh-token-flow)
+  - [Support login for multiple devices / Sessions](#support-login-for-multiple-devices--sessions)
+- [Logout](#logout)
+- [Q&A](#qa)
+  - [After `POST /api/v1/auth/logout` or removing session from the database, the user can still make requests with an `access token` for some time. Why?](#after-post-apiv1authlogout-or-removing-session-from-the-database-the-user-can-still-make-requests-with-an-access-token-for-some-time-why)
+
+---
+
+## General info
+
+### Auth via email flow
+
+The API provides email/password registration and login with confirmation, password reset, and refresh tokens.
+
+```mermaid
+sequenceDiagram
+    participant A as Frontend (Web, Mobile)
+    participant B as Task Scheduling API
+
+    A->>B: 1. Sign up via email + password
+    A->>B: 2. Sign in via email + password
+    B->>A: 3. Receive access + refresh tokens
+    A->>B: 4. Call protected endpoints with access token
+```
+
+### Auth via external services or social networks flow
+
+Optional modules integrate Apple, Facebook, and Google sign-in. They exchange provider tokens for local JWTs.
+
+```mermaid
+sequenceDiagram
+    participant P as Provider (Apple/Google/Facebook)
+    participant A as Frontend
+    participant B as Task Scheduling API
+
+    A->>P: 1. Authenticate user
+    P->>A: 2. Return provider access token
+    A->>B: 3. Exchange provider token
+    B->>A: 4. Issue JWT + refresh token
+```
+
+Flow steps:
+1. Authenticate with the provider.
+2. Call one of the exchange endpoints:
+   - `POST /api/v1/auth/facebook/login`
+   - `POST /api/v1/auth/google/login`
+   - `POST /api/v1/auth/apple/login`
+3. Use the returned JWT for API requests.
+
+---
+
+## Configure Auth
+
+1. Generate strong secrets:
+   ```bash
+   node -e "console.log('\nAUTH_JWT_SECRET=' + require('crypto').randomBytes(256).toString('base64') + '\nAUTH_REFRESH_SECRET=' + require('crypto').randomBytes(256).toString('base64') + '\nAUTH_FORGOT_SECRET=' + require('crypto').randomBytes(256).toString('base64') + '\nAUTH_CONFIRM_EMAIL_SECRET=' + require('crypto').randomBytes(256).toString('base64'))"
+   ```
+2. Add them to `.env` alongside lifetimes:
+   ```text
+   AUTH_JWT_SECRET=...
+   AUTH_JWT_TOKEN_EXPIRES_IN=15m
+   AUTH_REFRESH_SECRET=...
+   AUTH_REFRESH_TOKEN_EXPIRES_IN=7d
+   AUTH_FORGOT_SECRET=...
+   AUTH_FORGOT_TOKEN_EXPIRES_IN=1h
+   AUTH_CONFIRM_EMAIL_SECRET=...
+   AUTH_CONFIRM_EMAIL_TOKEN_EXPIRES_IN=1d
+   ```
+
+---
+
+## Auth via Apple
+
+1. Configure an Apple Service ID and private key (see [apple-signin-auth](https://www.npmjs.com/package/apple-signin-auth)).
+2. Provide the credentials through environment variables (`APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_CLIENT_ID`, `APPLE_KEY_FILE_PATH`, etc.).
+
+## Auth via Facebook
+
+1. Create an app at <https://developers.facebook.com/>.
+2. Store `FACEBOOK_APP_ID` and `FACEBOOK_APP_SECRET` in `.env`.
+
+## Auth via Google
+
+1. Create OAuth credentials in the [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+2. Store `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env`.
+
+---
+
+## About JWT strategy
+
+`src/auth/strategies/jwt.strategy.ts` validates the token signature and ensures the payload holds a user id. It does **not** query the database per request to keep latency low—services should load additional user data when needed.
+
+```typescript
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+  // ...
+
+  public validate(payload) {
+    if (!payload.id) {
+      throw new UnauthorizedException();
+    }
+    return payload;
+  }
+}
+```
+
+> Fetch complete user details inside services if the controller needs more context.
+
+---
+
+## Refresh token flow
+
+1. `POST /api/v1/auth/email/login` returns `{ token, tokenExpires, refreshToken }`.
+2. Use `token` in the `Authorization` header for protected requests.
+3. Before the access token expires, call `POST /api/v1/auth/refresh` with the refresh token to obtain a new pair.
+
+### Support login for multiple devices / Sessions
+
+The API creates a session record per login. During refresh the stored session hash is verified and rotated, ensuring previous refresh tokens for that session are invalidated.
+
+---
+
+## Logout
+
+1. Call `POST /api/v1/auth/logout`.
+2. Remove stored tokens on the client (cookies, localStorage, etc.).
+
+---
+
+## Q&A
+
+### After `POST /api/v1/auth/logout` or removing session from the database, the user can still make requests with an `access token` for some time. Why?
+
+JWTs are stateless and remain valid until `AUTH_JWT_TOKEN_EXPIRES_IN` is reached. Immediate revocation would require extra database checks on every request, which harms performance. If you absolutely need revocation, extend the JWT strategy to confirm session existence, but be aware of the trade-offs.
+
+---
+
+Previous: [Database](database.md)
+
+Next: [Serialization](serialization.md)
+# Auth
+
+## Table of Contents <!-- omit in toc -->
+
+- [General info](#general-info)
+  - [Auth via email flow](#auth-via-email-flow)
+  - [Auth via external services or social networks flow](#auth-via-external-services-or-social-networks-flow)
+- [Configure Auth](#configure-auth)
+- [Auth via Apple](#auth-via-apple)
+- [Auth via Facebook](#auth-via-facebook)
+- [Auth via Google](#auth-via-google)
+- [About JWT strategy](#about-jwt-strategy)
+- [Refresh token flow](#refresh-token-flow)
   - [Video example](#video-example)
   - [Support login for multiple devices / Sessions](#support-login-for-multiple-devices--sessions)
 - [Logout](#logout)

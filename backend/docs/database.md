@@ -1,8 +1,6 @@
 # Database
 
-## About databases
-
-The boilerplate ships with a MySQL + TypeORM stack. You can point TypeORM to another relational driver, but all tooling, migrations, and Docker assets are aligned with MySQL.
+The service ships with a MySQL + TypeORM stack. All provided migrations, seeds, and Docker assets assume a MySQL database, but you can point TypeORM to another relational driver by adjusting environment variables.
 
 ## Working with database schema (TypeORM)
 
@@ -168,7 +166,7 @@ npm run seed:run:relational
     import { StatusEntity } from '../../../../statuses/infrastructure/persistence/relational/entities/status.entity';
 
     @Module({
-      imports: [TypeOrmModule.forFeature([UserEntity, Role, Status])],
+      imports: [TypeOrmModule.forFeature([UserEntity, RoleEntity, StatusEntity])],
       providers: [UserSeedService, UserFactory],
       exports: [UserSeedService, UserFactory],
     })
@@ -179,7 +177,7 @@ npm run seed:run:relational
 1. Run seed:
 
     ```bash
-    npm run seed:run
+    npm run seed:run:relational
     ```
 
 ---

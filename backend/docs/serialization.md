@@ -1,6 +1,6 @@
 # Serialization
 
-For serialization boilerplate use [class-transformer](https://www.npmjs.com/package/class-transformer) and global interceptor `ClassSerializerInterceptor`.
+The API uses Nest’s global `ClassSerializerInterceptor` together with [class-transformer](https://www.npmjs.com/package/class-transformer). Domain entities and DTOs decide what fields are exposed to different audiences.
 
 ---
 
@@ -13,7 +13,7 @@ For serialization boilerplate use [class-transformer](https://www.npmjs.com/pack
 
 ## Hide private property
 
-If you need to hide some property in the entity you can use `@Exclude({ toPlainOnly: true })` on the column.
+Hide sensitive properties with `@Exclude({ toPlainOnly: true })` on the column.
 
 ```ts
 // /src/users/entities/user.entity.ts
@@ -34,7 +34,7 @@ export class User extends EntityRelationalHelper {
 
 ## Show private property for admins
 
-1. Create a controller that returns data only for admin and add `@SerializeOptions({ groups: ['admin'] })` to method:
+1. Create a controller method restricted to admins and annotate it with `@SerializeOptions({ groups: ['admin'] })`:
 
    ```ts
    // /src/users/users.controller.ts
@@ -66,7 +66,7 @@ export class User extends EntityRelationalHelper {
    }
    ```
 
-1. In the entity add `@Expose({ groups: ['admin'] })` to the column that should be exposed for admin:
+1. In the entity add `@Expose({ groups: ['admin'] })` to the column that should be visible to that group:
 
    ```ts
    // /src/users/entities/user.entity.ts

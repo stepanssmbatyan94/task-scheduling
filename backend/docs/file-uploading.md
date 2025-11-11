@@ -20,15 +20,15 @@
 
 ## Drivers support
 
-Out-of-box boilerplate supports the following drivers: `local`, `s3`, and `s3-presigned`. You can set it in the `.env` file, variable `FILE_DRIVER`. If you want to use another service for storing files, you can extend it.
+The API supports the following drivers out of the box: `local`, `s3`, and `s3-presigned`. Configure them via the `FILE_DRIVER` environment variable. Extend the `files` module if you need a different storage backend.
 
-> For production we recommend using the "s3-presigned" driver to offload your server.
+> For production we recommend using the `s3-presigned` driver to offload uploads to S3 directly.
 
 ---
 
 ## Uploading and attach file flow for `local` driver
 
-Endpoint `/api/v1/files/upload` is used for uploading files, which returns `File` entity with `id` and `path`. After receiving `File` entity you can attach this to another entity.
+Endpoint `/api/v1/files/upload` accepts multipart uploads and returns a `File` entity with `id` and `path`. Attach that id to other resources (e.g., user avatar).
 
 ### An example of uploading an avatar to a user profile (local)
 
@@ -43,24 +43,14 @@ sequenceDiagram
     A->>B: Update user via PATCH /api/v1/auth/me
 ```
 
-### Video example
-
-<https://user-images.githubusercontent.com/6001723/224558636-d22480e4-f70a-4789-b6fc-6ea343685dc7.mp4>
-
 ## Uploading and attach file flow for `s3` driver
 
-Endpoint `/api/v1/files/upload` is used for uploading files, which returns `File` entity with `id` and `path`. After receiving `File` entity you can attach this to another entity.
+With the `s3` driver, the API streams the file to S3 and then returns the stored metadata.
 
 ### Configuration for `s3` driver
 
-1. Open https://s3.console.aws.amazon.com/s3/buckets
-1. Click "Create bucket"
-1. Create bucket (for example, `your-unique-bucket-name`)
-1. Open your bucket
-1. Click "Permissions" tab
-1. Find "Cross-origin resource sharing (CORS)" section
-1. Click "Edit"
-1. Paste the following configuration
+1. Create an S3 bucket.
+2. Add a permissive CORS config while developing:
 
     ```json
     [
@@ -73,16 +63,15 @@ Endpoint `/api/v1/files/upload` is used for uploading files, which returns `File
     ]
     ```
 
-1. Click "Save changes"
-1. Update `.env` file with the following variables:
+3. Provide environment variables:
 
-    ```dotenv
-    FILE_DRIVER=s3
-    ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
-    SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
-    AWS_S3_REGION=YOUR_AWS_S3_REGION
-    AWS_DEFAULT_S3_BUCKET=YOUR_AWS_DEFAULT_S3_BUCKET
-    ```
+   ```dotenv
+   FILE_DRIVER=s3
+   ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
+   SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
+   AWS_S3_REGION=YOUR_AWS_S3_REGION
+   AWS_DEFAULT_S3_BUCKET=YOUR_AWS_DEFAULT_S3_BUCKET
+   ```
 
 ### An example of uploading an avatar to a user profile (S3)
 
@@ -101,18 +90,11 @@ sequenceDiagram
 
 ## Uploading and attach file flow for `s3-presigned` driver
 
-Endpoint `/api/v1/files/upload` is used for uploading files. In this case `/api/v1/files/upload` receives only `fileName` property (without binary file), and returns the `presigned URL` and `File` entity with `id` and `path`. After receiving the `presigned URL` and `File` entity you need to upload your file to the `presigned URL` and after that attach `File` to another entity.
+For `s3-presigned`, the API issues a pre-signed URL instead of receiving the binary payload. Clients upload directly to S3 and then associate the resulting `File` record.
 
 ### Configuration for `s3-presigned` driver
 
-1. Open https://s3.console.aws.amazon.com/s3/buckets
-1. Click "Create bucket"
-1. Create bucket (for example, `your-unique-bucket-name`)
-1. Open your bucket
-1. Click "Permissions" tab
-1. Find "Cross-origin resource sharing (CORS)" section
-1. Click "Edit"
-1. Paste the following configuration
+1. Create an S3 bucket and configure CORS:
 
     ```json
     [
@@ -125,35 +107,17 @@ Endpoint `/api/v1/files/upload` is used for uploading files. In this case `/api/
     ]
     ```
 
-   For production we recommend to use more strict configuration:
+   For production, restrict origins to your domain.
 
-   ```json
-   [
-     {
-       "AllowedHeaders": ["*"],
-       "AllowedMethods": ["PUT"],
-       "AllowedOrigins": ["https://your-domain.com"],
-       "ExposeHeaders": []
-     },
-      {
-        "AllowedHeaders": ["*"],
-        "AllowedMethods": ["GET"],
-        "AllowedOrigins": ["*"],
-        "ExposeHeaders": []
-      }
-   ]
+2. Set environment variables:
+
+   ```dotenv
+   FILE_DRIVER=s3-presigned
+   ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
+   SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
+   AWS_S3_REGION=YOUR_AWS_S3_REGION
+   AWS_DEFAULT_S3_BUCKET=YOUR_AWS_DEFAULT_S3_BUCKET
    ```
-
-1. Click "Save changes"
-1. Update `.env` file with the following variables:
-
-    ```dotenv
-    FILE_DRIVER=s3-presigned
-    ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
-    SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
-    AWS_S3_REGION=YOUR_AWS_S3_REGION
-    AWS_DEFAULT_S3_BUCKET=YOUR_AWS_DEFAULT_S3_BUCKET
-    ```
 
 ### An example of uploading an avatar to a user profile (S3 Presigned URL)
 
@@ -174,7 +138,7 @@ sequenceDiagram
 
 ## How to delete files?
 
-We prefer not to delete files, as this may have negative experience during restoring data. Also for this reason we also use [Soft-Delete](https://orkhan.gitbook.io/typeorm/docs/delete-query-builder#soft-delete) approach in database. However, if you need to delete files you can create your own handler, cronjob, etc.
+Files are retained to avoid losing historical context. If you need automated cleanup, create a scheduled job that removes objects from storage and disables associated records.
 
 ---
 

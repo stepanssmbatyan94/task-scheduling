@@ -4,35 +4,27 @@
 
 ## Generate resource
 
-Generate resource with the following commands:
+Use the Hygen generators bundled with the project to scaffold new modules that match the existing domain / infrastructure structure.
 
-### For relational database (MySQL + TypeORM)
+### Relational modules (TypeORM)
 
 ```bash
 npm run generate:resource:relational -- --name ResourceName
+# or
+yarn generate:resource:relational --name ResourceName
 ```
 
-Example:
-
-```bash
-npm run generate:resource:relational -- --name Category
-```
-
-#### Video guideline for relational database (MySQL + TypeORM)
-
-<https://github.com/user-attachments/assets/f7f91a7d-f9ff-4653-a78a-152ac5e7a95d>
+This creates a folder under `src/<resource-name>/` with controller, service, domain entity, DTOs, relational entities, and repository adapters.
 
 ## Add property to resource
 
-### Property for relational database (MySQL + TypeORM)
-
 ```bash
 npm run add:property:to-relational
+# or
+yarn add:property:to-relational
 ```
 
-#### Video guideline how to add property for relational database (MySQL + TypeORM)
-
-<https://github.com/user-attachments/assets/95b9d70a-70cf-442a-b8bf-a73d32810e0c>
+Follow the prompts to generate new fields for the relational entity, mapper, and DTOs.
 
 ---
 

@@ -1,28 +1,14 @@
 # Introduction
 
-## Online demo
+The Task Scheduling API is the service layer that powers real-time task coordination for the platform. It exposes REST and websocket endpoints for authenticating users, managing roles, planning work on Kanban boards, and synchronising assignments across teams.
 
-Demo: <https://nestjs-boilerplate-test.herokuapp.com/docs>
+## Key Responsibilities
 
-Frontend (React, Next.js): <https://github.com/brocoders/extensive-react-boilerplate>
-
-<https://github.com/user-attachments/assets/a66f114a-c714-4036-8eeb-20cbf04ae985>
-
-## Features
-
-- [x] Database. Powered by [TypeORM](https://www.npmjs.com/package/typeorm) with MySQL.
-- [x] Seeding.
-- [x] Config Service ([@nestjs/config](https://www.npmjs.com/package/@nestjs/config)).
-- [x] Mailing ([nodemailer](https://www.npmjs.com/package/nodemailer)).
-- [x] Sign in and sign up via email.
-- [x] Social sign in (Apple, Facebook, Google).
-- [x] Admin and User roles.
-- [x] Internationalization/Translations (I18N) ([nestjs-i18n](https://www.npmjs.com/package/nestjs-i18n)).
-- [x] File uploads. Support local and Amazon S3 drivers.
-- [x] Swagger.
-- [x] Support E2E and units tests.
-- [x] Docker.
-- [x] CI (Github Actions).
+- Authenticate users with email/password credentials, refresh tokens, and optional social providers.
+- Manage organizations’ roles, permissions, user availability, and profile metadata.
+- Serve CRUD APIs for tasks, task statuses, and scheduling rules while pushing board updates over websockets.
+- Provide supporting services such as localization, transactional emails, and file handling for avatars and attachments.
+- Offer operational tooling including migrations, seed data, smoke/e2e tests, and Docker-based local development.
 
 ---
 

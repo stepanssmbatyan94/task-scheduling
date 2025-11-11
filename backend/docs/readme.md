@@ -1,4 +1,6 @@
-# NestJS Boilerplate Documentation
+# Task Scheduling API Documentation
+
+This folder aggregates detailed guides for configuring, operating, and extending the NestJS backend that powers the Task Scheduling platform.
 
 ---
 
