@@ -48,6 +48,3 @@ Running the backend seed (`npm run seed:run:relational`) provisions ready-to-use
 - Sign in as a **standard user** to create tasks, update their own work, and assign or reassign tasks they own (no access to user management).  
 - Task assignments trigger realtime notifications over the Socket.IO channel so assignees see updates instantly.
 
-## License
-Both the backend and frontend are distributed under the MIT License (see `backend/LICENSE` and `frontend/LICENSE`).
-

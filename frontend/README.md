@@ -70,6 +70,3 @@ src/
 - Backend API setup and endpoints: [`../backend/README.md`](../backend/README.md)
 - Architecture and deep dives: [`../backend/docs/readme.md`](../backend/docs/readme.md)
 - Repository overview: [`../README.md`](../README.md)
-
-## License
-Released under the [MIT License](LICENSE).

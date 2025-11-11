@@ -105,6 +105,3 @@ docker compose up -d
 ## Documentation
 - [Architecture, operations, and advanced guides](docs/readme.md)
 - [Project overview and frontend entry point](../README.md)
-
-## License
-Released under the [MIT License](LICENSE).
