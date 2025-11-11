@@ -32,7 +32,8 @@ export function useTaskStatuses() {
   } = useQuery({
     queryKey: QUERY_KEY,
     queryFn: () => fetchTaskStatusesApi(),
-    staleTime: 30000 // 30 seconds
+    staleTime: 30000, // 30 seconds
+    refetchOnMount: 'always'
   });
 
   const taskStatuses = computed<TaskStatus[]>(() => {

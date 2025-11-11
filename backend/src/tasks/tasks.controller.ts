@@ -36,7 +36,6 @@ import { RolesGuard } from '../roles/roles.guard';
 import { infinityPagination } from '../utils/infinity-pagination';
 
 @ApiBearerAuth()
-@Roles(RoleEnum.admin)
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('Tasks')
 @Controller({
@@ -52,6 +51,7 @@ export class TasksController {
   @SerializeOptions({
     groups: ['admin'],
   })
+  @Roles(RoleEnum.admin)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
@@ -62,8 +62,9 @@ export class TasksController {
     type: InfinityPaginationResponse(Task),
   })
   @SerializeOptions({
-    groups: ['admin'],
+    groups: ['admin', 'user'],
   })
+  @Roles(RoleEnum.admin, RoleEnum.user)
   @Get()
   @HttpCode(HttpStatus.OK)
   async findAll(
@@ -93,8 +94,9 @@ export class TasksController {
     type: Task,
   })
   @SerializeOptions({
-    groups: ['admin'],
+    groups: ['admin', 'user'],
   })
+  @Roles(RoleEnum.admin, RoleEnum.user)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiParam({
@@ -112,6 +114,7 @@ export class TasksController {
   @SerializeOptions({
     groups: ['admin'],
   })
+  @Roles(RoleEnum.admin)
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @ApiParam({
@@ -132,6 +135,7 @@ export class TasksController {
     type: String,
     required: true,
   })
+  @Roles(RoleEnum.admin)
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: Task['id']): Promise<void> {
     return this.tasksService.remove(id);

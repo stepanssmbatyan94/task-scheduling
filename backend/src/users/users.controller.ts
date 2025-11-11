@@ -37,7 +37,6 @@ import { RolesGuard } from '../roles/roles.guard';
 import { infinityPagination } from '../utils/infinity-pagination';
 
 @ApiBearerAuth()
-@Roles(RoleEnum.admin)
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('Users')
 @Controller({
@@ -53,6 +52,7 @@ export class UsersController {
   @SerializeOptions({
     groups: ['admin'],
   })
+  @Roles(RoleEnum.admin)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createProfileDto: CreateUserDto): Promise<User> {
@@ -63,8 +63,9 @@ export class UsersController {
     type: InfinityPaginationResponse(User),
   })
   @SerializeOptions({
-    groups: ['admin'],
+    groups: ['admin', 'user'],
   })
+  @Roles(RoleEnum.admin, RoleEnum.user)
   @Get()
   @HttpCode(HttpStatus.OK)
   async findAll(
@@ -94,8 +95,9 @@ export class UsersController {
     type: User,
   })
   @SerializeOptions({
-    groups: ['admin'],
+    groups: ['admin', 'user'],
   })
+  @Roles(RoleEnum.admin, RoleEnum.user)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiParam({
@@ -113,6 +115,7 @@ export class UsersController {
   @SerializeOptions({
     groups: ['admin'],
   })
+  @Roles(RoleEnum.admin)
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @ApiParam({
@@ -134,6 +137,7 @@ export class UsersController {
     required: true,
   })
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles(RoleEnum.admin)
   remove(@Param('id') id: User['id']): Promise<void> {
     return this.usersService.remove(id);
   }

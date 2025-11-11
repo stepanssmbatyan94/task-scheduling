@@ -101,7 +101,8 @@ export function useTasks(options: { filters?: Ref<TaskFilters> } = {}) {
       ];
       return fetchTasksApi(params);
     },
-    staleTime: 30000
+    staleTime: 30000,
+    refetchOnMount: 'always'
   });
 
   const {

@@ -29,7 +29,6 @@ import { CreateTaskStatusDto } from './dto/create-task-status.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 
 @ApiBearerAuth()
-@Roles(RoleEnum.admin)
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('Task Statuses')
 @Controller({
@@ -45,6 +44,7 @@ export class TaskStatusesController {
   @SerializeOptions({
     groups: ['admin'],
   })
+  @Roles(RoleEnum.admin)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(
@@ -57,8 +57,9 @@ export class TaskStatusesController {
     type: [TaskStatus],
   })
   @SerializeOptions({
-    groups: ['admin'],
+    groups: ['admin', 'user'],
   })
+  @Roles(RoleEnum.admin, RoleEnum.user)
   @Get()
   @HttpCode(HttpStatus.OK)
   findAll(): Promise<TaskStatus[]> {
@@ -69,8 +70,9 @@ export class TaskStatusesController {
     type: TaskStatus,
   })
   @SerializeOptions({
-    groups: ['admin'],
+    groups: ['admin', 'user'],
   })
+  @Roles(RoleEnum.admin, RoleEnum.user)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiParam({
@@ -90,6 +92,7 @@ export class TaskStatusesController {
   @SerializeOptions({
     groups: ['admin'],
   })
+  @Roles(RoleEnum.admin)
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @ApiParam({
@@ -111,6 +114,7 @@ export class TaskStatusesController {
     required: true,
   })
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles(RoleEnum.admin)
   remove(@Param('id') id: TaskStatus['id']): Promise<void> {
     return this.taskStatusesService.remove(id);
   }

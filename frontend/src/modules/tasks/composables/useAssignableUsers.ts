@@ -17,7 +17,8 @@ export function useAssignableUsers() {
   } = useQuery({
     queryKey: QUERY_KEY,
     queryFn: fetchAssignableUsersApi,
-    staleTime: 60_000
+    staleTime: 60_000,
+    refetchOnMount: 'always'
   });
   const assignableUsers = computed<AssignableUser[]>(() => data.value ?? []);
 
