@@ -1,73 +1,110 @@
-# NestJS REST API boilerplate 🇺🇦
+# Task Scheduling API
 
-[![image](https://github.com/brocoders/nestjs-boilerplate/assets/72293912/197da43e-02f4-4895-8d3e-b7a42a591c26)](https://github.com/new?template_name=nestjs-boilerplate&template_owner=brocoders)
+The Task Scheduling API powers authentication, user management, availability tracking, and the Kanban-style task board used by the web client. It is built with NestJS and TypeORM on top of MySQL and exposes both REST endpoints and realtime updates.
 
-![github action status](https://github.com/brocoders/nestjs-boilerplate/actions/workflows/docker-e2e.yml/badge.svg)
-[![renovate](https://img.shields.io/badge/renovate-enabled-%231A1F6C?logo=renovatebot)](https://app.renovatebot.com/dashboard)
-[![Static Badge](https://img.shields.io/badge/supported_by-brocoders-d91965?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTMwIiBoZWlnaHQ9IjE4NyIgdmlld0JveD0iMCAwIDEzMCAxODciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI%2BCjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMF83NzExXzQ4OTEpIj4KPHBhdGggZD0iTTc1Ljk5NjcgNDUuNzUwNkM2NS4xMDg5IDQ2Ljg2MSA1Ny45MjMgNTguNDA5NyA2Mi4yNzgxIDY4Ljg0OEwxMDguNDQyIDE4N0w3My42MDEzIDE1NS4wMTlIMzQuODQwOUMyMC42ODY4IDE1NS4wMTkgOS4zNjM0OSAxNDMuNDcgOS4zNjM0OSAxMjkuMDM0Vjk0LjYxMDVDOS4zNjM0OSA5Mi4xNjc1IDguNDkyNDYgODkuNzI0NSA2Ljc1MDQyIDg3Ljk0NzdMMCA4MS4wNjNMNi43NTA0MiA3NC4xNzgxQzguNDkyNDYgNzIuNDAxNCA5LjM2MzQ5IDY5Ljk1ODQgOS4zNjM0OSA2Ny41MTU0VjMxLjA5MjZDOS4zNjM0OSAxMy43Njk2IDIzLjA4MjEgMCAzOS44NDkyIDBINTguMTQwN0w3NS45OTY3IDQ1Ljc1MDZaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTI1LjY0NiAxMTIuMzc4Vjk0LjgzMjdDMTI1LjY0NiA5My43MjIyIDEyNi4wODEgOTIuNjExOCAxMjYuOTUyIDkxLjcyMzRMMTMwLjAwMSA4OC4zOTIxTDEyNi45NTIgODUuMDYwN0MxMjYuMDgxIDg0LjE3MjQgMTI1LjY0NiA4My4wNjE5IDEyNS42NDYgODEuOTUxNFY2OS43MzY1QzEyNS42NDYgNTYuNDExMSAxMTQuOTc2IDQ1Ljc1MDcgMTAyLjEyOCA0NS43NTA3SDc1Ljk5NzNMMTA1LjYxMiAxMzAuODExQzEwNS42MTIgMTMwLjgxMSAxMTAuNjIgMTMwLjgxMSAxMTAuODM4IDEzMC44MTFDMTE5LjExMyAxMjkuMDM1IDEyNS42NDYgMTIxLjQ4NCAxMjUuNjQ2IDExMi4zNzhaIiBmaWxsPSJ3aGl0ZSIvPgo8L2c%2BCjxkZWZzPgo8Y2xpcFBhdGggaWQ9ImNsaXAwXzc3MTFfNDg5MSI%2BCjxyZWN0IHdpZHRoPSIxMzAiIGhlaWdodD0iMTg3IiBmaWxsPSJ3aGl0ZSIvPgo8L2NsaXBQYXRoPgo8L2RlZnM%2BCjwvc3ZnPgo%3D&logoColor=d91965)](https://brocoders.com/)
-[![Discord Badge](https://img.shields.io/badge/discord-NodeJS_boilerplate-d91965?style=flat&labelColor=5866f2&logo=discord&logoColor=white&link=https://discord.com/channels/520622812742811698/1197293125434093701)](https://discord.com/channels/520622812742811698/1197293125434093701)
+## Core Capabilities
+- Email-based authentication with refresh tokens, password resets, and optional social providers (Apple, Google, Facebook).
+- Role- and permission-based access for administrators, managers, and standard users.
+- CRUD endpoints for tasks, task statuses, and user availability with socket notifications for board updates.
+- Background services for localization, transactional emails, and file uploads (local or S3).
+- Tooling for migrations, seed data, automated tests, and API documentation (Swagger).
 
-<br />
-<p align="center"><a href="https://discord.com/channels/520622812742811698/1197293125434093701"><img src="https://github.com/brocoders/nestjs-boilerplate/assets/72293912/c9d5fbf0-b56d-46b5-bb30-f96f44764bae" width="300"/></a></p>
-<br />
+## Technology Stack
+- [NestJS 11](https://docs.nestjs.com/) with modular architecture and dependency injection.
+- [TypeORM](https://typeorm.io/) with MySQL and CLI-based migrations.
+- [Passport](https://www.passportjs.org/) strategies for JWT and social login.
+- [Socket.IO](https://socket.io/) gateway for live task updates.
+- [nestjs-i18n](https://github.com/toonvanstrijp/nestjs-i18n) for multi-language support.
+- [Jest](https://jestjs.io/) for unit and e2e tests.
 
-## Description <!-- omit in toc -->
+## Prerequisites
+- Node.js 20+ and npm 10+.
+- MySQL 8 (local instance or Docker container).
+- Optional: Docker for running the infrastructure stack defined in `docker-compose.yaml`.
 
-NestJS REST API boilerplate for a typical project
+## Setup
 
-[Full documentation here](/docs/readme.md)
+### 1. Install dependencies
+```sh
+npm install
+```
 
-Demo: <https://nestjs-boilerplate-test.herokuapp.com/docs>
+### 2. Configure environment variables
+Create a `.env` file in the `backend` directory. The API validates required keys on boot. Minimum configuration:
 
-A fully compatible frontend boilerplate: <https://github.com/brocoders/extensive-react-boilerplate>
+```env
+# Application
+APP_PORT=3000
+API_PREFIX=api
+FRONTEND_DOMAIN=http://localhost:5173
+BACKEND_DOMAIN=http://localhost:3000
 
-Belongs to the [bc boilerplates](https://bcboilerplates.com/) ecosystem
+# Database (alternatively provide DATABASE_URL)
+DATABASE_TYPE=mysql
+DATABASE_HOST=localhost
+DATABASE_PORT=3306
+DATABASE_NAME=task_scheduling
+DATABASE_USERNAME=root
+DATABASE_PASSWORD=secret
 
-<https://github.com/user-attachments/assets/a66f114a-c714-4036-8eeb-20cbf04ae985>
+# JWT & token lifetimes
+AUTH_JWT_SECRET=replace-with-secure-value
+AUTH_JWT_TOKEN_EXPIRES_IN=15m
+AUTH_REFRESH_SECRET=replace-with-secure-value
+AUTH_REFRESH_TOKEN_EXPIRES_IN=7d
+AUTH_FORGOT_SECRET=replace-with-secure-value
+AUTH_FORGOT_TOKEN_EXPIRES_IN=1h
+AUTH_CONFIRM_EMAIL_SECRET=replace-with-secure-value
+AUTH_CONFIRM_EMAIL_TOKEN_EXPIRES_IN=1d
 
-## Table of Contents <!-- omit in toc -->
+# Mailer
+MAIL_HOST=localhost
+MAIL_PORT=1025
+MAIL_USER=
+MAIL_PASSWORD=
+MAIL_DEFAULT_EMAIL=no-reply@taskscheduling.local
+MAIL_DEFAULT_NAME=Task Scheduling
+MAIL_IGNORE_TLS=true
+MAIL_SECURE=false
+MAIL_REQUIRE_TLS=false
+```
 
-- [Features](#features)
-- [Contributors](#contributors)
-- [Support](#support)
+Optional providers (Apple, Google, Facebook), S3 credentials, and other advanced settings are defined in `src/**/config/*.config.ts`.
 
-## Features
+### 3. Prepare the database
+```sh
+npm run migration:run
+npm run seed:run:relational
+```
 
-- [x] Database. Powered by [TypeORM](https://www.npmjs.com/package/typeorm) with MySQL.
-- [x] Seeding.
-- [x] Config Service ([@nestjs/config](https://www.npmjs.com/package/@nestjs/config)).
-- [x] Mailing ([nodemailer](https://www.npmjs.com/package/nodemailer)).
-- [x] Sign in and sign up via email.
-- [x] Social sign in (Apple, Facebook, Google).
-- [x] Admin and User roles.
-- [x] Internationalization/Translations (I18N) ([nestjs-i18n](https://www.npmjs.com/package/nestjs-i18n)).
-- [x] File uploads. Support local and Amazon S3 drivers.
-- [x] Swagger.
-- [x] E2E and units tests.
-- [x] Docker.
-- [x] CI (Github Actions).
+### 4. Run the API
+```sh
+npm run start:dev
+```
 
-## Contributors
+The service listens on `http://localhost:3000`. Swagger documentation is available at `http://localhost:3000/docs`.
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Shchepotin"><img src="https://avatars.githubusercontent.com/u/6001723?v=4?s=100" width="100px;" alt="Vladyslav Shchepotin"/><br /><sub><b>Vladyslav Shchepotin</b></sub></a><br /><a href="#maintenance-Shchepotin" title="Maintenance">🚧</a> <a href="#doc-Shchepotin" title="Documentation">📖</a> <a href="#code-Shchepotin" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/SergeiLomako"><img src="https://avatars.githubusercontent.com/u/31205374?v=4?s=100" width="100px;" alt="SergeiLomako"/><br /><sub><b>SergeiLomako</b></sub></a><br /><a href="#code-SergeiLomako" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ElenVlass"><img src="https://avatars.githubusercontent.com/u/72293912?v=4?s=100" width="100px;" alt="Elena Vlasenko"/><br /><sub><b>Elena Vlasenko</b></sub></a><br /><a href="#doc-ElenVlass" title="Documentation">📖</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="http://brocoders.com"><img src="https://avatars.githubusercontent.com/u/226194?v=4?s=100" width="100px;" alt="Rodion"/><br /><sub><b>Rodion</b></sub></a><br /><a href="#business-sars" title="Business development">💼</a></td>
-    </tr>
-  </tbody>
-</table>
+### Docker workflow
+To start MySQL, Maildev, and the API together:
+```sh
+docker compose up -d
+```
 
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
+## Scripts
+| Script | Description |
+| ------ | ----------- |
+| `npm run start:dev` | Start the API in watch mode. |
+| `npm run start:prod` | Run the prebuilt application from `dist/`. |
+| `npm run build` | Compile TypeScript to `dist/`. |
+| `npm run migration:run` | Apply database migrations. |
+| `npm run seed:run:relational` | Seed baseline data (roles, statuses, demo users). |
+| `npm run lint` | Lint the codebase with ESLint. |
+| `npm run test` | Run unit tests. |
+| `npm run test:e2e` | Execute end-to-end tests (requires database). |
 
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+## Documentation
+- [Architecture, operations, and advanced guides](docs/readme.md)
+- [Project overview and frontend entry point](../README.md)
 
-## Support
-
-If you seek consulting, support, or wish to collaborate, please contact us via [boilerplates@brocoders.com](mailto:boilerplates@brocoders.com). For any inquiries regarding boilerplates, feel free to ask on [GitHub Discussions](https://github.com/brocoders/nestjs-boilerplate/discussions) or [Discord](https://discord.com/channels/520622812742811698/1197293125434093701).
+## License
+Released under the [MIT License](LICENSE).
