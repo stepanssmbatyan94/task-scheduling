@@ -41,16 +41,7 @@ export const mockReponse = {
         profileImageUrl: null,
         status: 'ACTIVE'
       },
-      authorities: [
-        'role:create',
-        'role:edit',
-        'role:view_details',
-        'role:view_listing',
-        'user:create',
-        'user:edit',
-        'user:view_details',
-        'user:view_listing'
-      ]
+      authorities: ['user:create', 'user:edit', 'user:view_details', 'user:view_listing']
     }
   },
   getUsers: {
@@ -168,103 +159,6 @@ export const mockReponse = {
       positionId: null
     }
   },
-  getRoles: {
-    data: [
-      {
-        id: 1,
-        nameEn: 'Super Admin',
-        nameKh: 'អ្នកគ្រប់គ្រងជាន់ខ្ពស់',
-        type: 'SUPER_ADMIN',
-        description: null,
-        status: 'ACTIVE',
-        permissions: null,
-        createdDate: null,
-        createdBy: null,
-        modifiedDate: null,
-        modifiedBy: null
-      }
-    ],
-    page: 1,
-    size: 20,
-    totalElements: 1,
-    totalPages: 1,
-    first: true,
-    last: true
-  },
-  getRoleById: {
-    message: 'Role retrieved successfully',
-    data: {
-      id: 1,
-      nameEn: 'Super Admin',
-      nameKh: 'អ្នកគ្រប់គ្រងជាន់ខ្ពស់',
-      type: 'SUPER_ADMIN',
-      description: null,
-      status: 'ACTIVE',
-      permissions: [
-        {
-          id: 7,
-          code: 'role:create',
-          nameEn: 'Create role',
-          nameKh: 'បង្កើតតួនាទី'
-        },
-        {
-          id: 8,
-          code: 'role:edit',
-          nameEn: 'Update role',
-          nameKh: 'ធ្វើបច្ចុប្បន្នភាពតួនាទី'
-        },
-        {
-          id: 2,
-          code: 'user:view_details',
-          nameEn: 'View user details',
-          nameKh: 'មើលព័ត៌មានលម្អិតអ្នកប្រើប្រាស់'
-        },
-        {
-          id: 3,
-          code: 'user:create',
-          nameEn: 'Create user',
-          nameKh: 'បង្កើតអ្នកប្រើប្រាស់'
-        },
-        {
-          id: 1,
-          code: 'user:view_listing',
-          nameEn: 'View user listing',
-          nameKh: 'មើលបញ្ជីអ្នកប្រើប្រាស់'
-        },
-        {
-          id: 4,
-          code: 'user:edit',
-          nameEn: 'Update user',
-          nameKh: 'ធ្វើបច្ចុប្បន្នភាពអ្នកប្រើប្រាស់'
-        },
-        {
-          id: 6,
-          code: 'role:view_details',
-          nameEn: 'View role details',
-          nameKh: 'មើលព័ត៌មានលម្អិតអំពីតួនាទី'
-        },
-        {
-          id: 5,
-          code: 'role:view_listing',
-          nameEn: 'View role listing',
-          nameKh: 'មើលបញ្ជីតួនាទី'
-        }
-      ],
-      createdDate: null,
-      createdBy: null,
-      modifiedDate: null,
-      modifiedBy: null
-    }
-  },
-  getRoleAutoComplete: {
-    data: [
-      {
-        id: 1,
-        nameEn: 'Super Admin',
-        nameKh: 'Super Admin'
-      }
-    ]
-  },
   getResourceWithPermission: {
     message: 'Permission retrieve successfully',
     data: [
@@ -299,38 +193,6 @@ export const mockReponse = {
             nameKh: 'បង្កើតអ្នកប្រើប្រាស់'
           }
         ]
-      },
-      {
-        id: 2,
-        code: 'ROLE',
-        nameEn: 'Role',
-        nameKh: 'តួនាទី',
-        permissions: [
-          {
-            id: 6,
-            code: 'role:view_details',
-            nameEn: 'View role details',
-            nameKh: 'មើលព័ត៌មានលម្អិតអំពីតួនាទី'
-          },
-          {
-            id: 7,
-            code: 'role:create',
-            nameEn: 'Create role',
-            nameKh: 'បង្កើតតួនាទី'
-          },
-          {
-            id: 8,
-            code: 'role:edit',
-            nameEn: 'Update role',
-            nameKh: 'ធ្វើបច្ចុប្បន្នភាពតួនាទី'
-          },
-          {
-            id: 5,
-            code: 'role:view_listing',
-            nameEn: 'View role listing',
-            nameKh: 'មើលបញ្ជីតួនាទី'
-          }
-        ]
       }
     ]
   },
@@ -343,23 +205,5 @@ export const mockReponse = {
         nameKh: 'PNH - Head Office'
       }
     ]
-  },
-  getMasterDataRoleType: {
-    ROLE_TYPE: {
-      data: [
-        {
-          id: 1,
-          value: 'SUPER_ADMIN',
-          name: 'Super Admin',
-          type: 'ROLE_TYPE',
-          sequence: 1,
-          description: null,
-          isDefault: true,
-          status: 'A',
-          nameEn: null,
-          nameKh: null
-        }
-      ]
-    }
   }
 };
